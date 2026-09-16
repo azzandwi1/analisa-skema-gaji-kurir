@@ -1,4 +1,4 @@
-﻿# 📦 Model Simulasi Skema Kompensasi Kurir Last-Mile
+# 📦 Model Simulasi Skema Kompensasi Kurir Last-Mile
 
 > **Kalkulator & Simulator Interaktif Penentuan Upah Kurir Berkelanjutan di Indonesia:** Menyeimbangkan Produktivitas Antaran, Retensi Kurir (*Low Turnover*), dan Efisiensi Biaya (*Unit Economics* Perusahaan).
 
@@ -13,6 +13,17 @@ Proyek ini menyediakan model analitik dan dashboard interaktif untuk membandingk
 4. **Skema Target Kuota Minimal (*Quota + Cliff Bonus*)** — Gaji pokok + bonus sekaligus jika melampaui ambang batas tertentu (rawan *slacking* & manipulasi status di sore hari).
 
 Dashboard ini dirancang khusus dengan konteks ketenagakerjaan di Indonesia (PP No. 51/2023) dan didukung literatur ilmiah operasional (*Management Science*, *M&SOM*, *Quarterly Journal of Economics*).
+
+### 🌟 Fitur Baru: Auto-Calculator UMK & Logistics Difficulty Index (LDI)
+* **Database UMK Kabupaten/Kota:** Pilihan daerah terintegrasi dari DKI Jakarta, Jawa Barat (Kota Bekasi, Karawang, Bandung, dll.), Jawa Tengah, Jawa Timur, Banten, Sumatera, Bali, Kalimantan, Sulawesi, hingga Papua.
+* **Faktor Kesulitan Lapangan (Multi-Index):**
+  1. *Topografi Medan* (Datar: 1.00x, Berbukit: 1.10x, Pegunungan/Ekstrem: 1.25x)
+  2. *Kerapatan Alamat & Jalan* (Rapi: 1.00x, Gang Sempit/Padat: 1.08x, Pedesaan/Jalan Rusak: 1.20x)
+  3. *Kemacetan Lalu Lintas* (Lancar: 1.00x, Sedang: 1.05x, Macet Kronis: 1.15x)
+* **Kalkulasi & Sinkronisasi Otomatis:**
+  * Rekomendasi Gaji Pokok: $W_{bln} = UMK \times LDI$
+  * Rekomendasi Kuota Dasar: $Q_{base} = \text{round}(50 / LDI)$
+  * Sekali klik untuk langsung diterapkan ke simulator dan tabel laba rugi.
 
 ---
 
