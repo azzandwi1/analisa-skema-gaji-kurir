@@ -136,8 +136,8 @@
                 <div class="text-xs font-bold text-sky-300 uppercase tracking-wider flex items-center gap-1.5">
                   <span>⚙️</span> 2. Profil Kesulitan Lapangan (Difficulty Factors)
                 </div>
-                <div class="text-xs font-mono font-bold bg-sky-500/20 text-sky-300 px-2.5 py-0.5 rounded border border-sky-400/30">
-                  Total LDI: <span id="txtLdiScore">1.00x</span>
+                <div id="badgeLdiScoreContainer" class="text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded border border-emerald-400/30 transition-colors">
+                  Total LDI: <span id="txtLdiScore">1.00x (Mudah)</span>
                 </div>
               </div>
 
@@ -1634,8 +1634,26 @@
       const regItem = list[regIdx] || list[0] || { name: "Standar", umk: 3500000 };
 
       const ldi = parseFloat(sliderLdi.value);
-      txtLdiScore.textContent = ldi.toFixed(2) + 'x';
-      txtLdiSliderLabel.textContent = ldi.toFixed(2) + 'x';
+      let ldiLabel = 'Mudah';
+      let ldiClass = 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30';
+      let ldiSliderClass = 'font-bold text-emerald-400 font-mono';
+      if (ldi > 1.30) {
+        ldiLabel = 'Ekstrem';
+        ldiClass = 'bg-rose-500/20 text-rose-300 border-rose-400/30';
+        ldiSliderClass = 'font-bold text-rose-400 font-mono';
+      } else if (ldi > 1.12) {
+        ldiLabel = 'Menengah';
+        ldiClass = 'bg-amber-500/20 text-amber-300 border-amber-400/30';
+        ldiSliderClass = 'font-bold text-amber-400 font-mono';
+      }
+
+      txtLdiScore.textContent = ldi.toFixed(2) + 'x (' + ldiLabel + ')';
+      const badgeLdiScoreContainer = document.getElementById('badgeLdiScoreContainer');
+      if (badgeLdiScoreContainer) {
+        badgeLdiScoreContainer.className = 'text-xs font-mono font-bold px-2.5 py-0.5 rounded border transition-colors ' + ldiClass;
+      }
+      txtLdiSliderLabel.textContent = ldi.toFixed(2) + 'x (' + ldiLabel + ')';
+      txtLdiSliderLabel.className = ldiSliderClass;
 
       badgeUmkValue.textContent = formatRupiah(regItem.umk) + ' / bln';
 
