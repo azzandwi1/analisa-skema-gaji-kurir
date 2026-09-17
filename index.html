@@ -113,6 +113,21 @@
                 <span class="text-[11px] text-slate-400">UMK Resmi Acuan:</span>
                 <span id="badgeUmkValue" class="text-xs font-mono font-bold text-amber-300">Rp 5.067.381 / bln</span>
               </div>
+
+              <!-- Porsi Rasio Gaji Pokok dari UMK -->
+              <div class="space-y-1.5 pt-1 border-t border-slate-700/60">
+                <div class="flex justify-between items-center text-[11px]">
+                  <span class="text-slate-300 font-medium">Porsi Pokok dari UMK:</span>
+                  <span id="txtUmkRatio" class="font-bold text-sky-400 font-mono">60% (Rp 3.040.428)</span>
+                </div>
+                <input id="sliderUmkRatio" type="range" min="30" max="100" step="5" value="60" class="w-full accent-sky-400 cursor-pointer">
+                <div class="flex justify-between text-[9px] text-slate-400">
+                  <button type="button" onclick="setUmkRatio(40)" class="cursor-pointer hover:text-white bg-transparent border-0 p-0 text-[9px] text-slate-400">40% (Fleksibel)</button>
+                  <button type="button" onclick="setUmkRatio(60)" class="cursor-pointer hover:text-white bg-transparent border-0 p-0 text-[9px] text-sky-300 font-bold">60% (Standar Hub)</button>
+                  <button type="button" onclick="setUmkRatio(75)" class="cursor-pointer hover:text-white bg-transparent border-0 p-0 text-[9px] text-slate-400">75% (PP 51)</button>
+                  <button type="button" onclick="setUmkRatio(100)" class="cursor-pointer hover:text-white bg-transparent border-0 p-0 text-[9px] text-slate-400">100% (Penuh)</button>
+                </div>
+              </div>
             </div>
 
             <!-- Kolom 2: Indeks Kesulitan Wilayah (7 cols) -->
@@ -1552,8 +1567,18 @@
     const resBaseCpD = document.getElementById('resBaseCpD');
     const checkAutoApply = document.getElementById('checkAutoApply');
 
+    const sliderUmkRatio = document.getElementById('sliderUmkRatio');
+    const txtUmkRatio = document.getElementById('txtUmkRatio');
+
     let currentCalculatedSalary = 3500000;
     let currentSuggestedQuota = 50;
+
+    function setUmkRatio(val) {
+      if (sliderUmkRatio) {
+        sliderUmkRatio.value = val;
+        calculateLdiAndSalary();
+      }
+    }
 
     function initUmkCalculator() {
       if (!selProvince) return;
@@ -1573,6 +1598,7 @@
       selInfra.addEventListener('change', onSubIndexChange);
       selTraffic.addEventListener('change', onSubIndexChange);
       sliderLdi.addEventListener('input', onLdiSliderChange);
+      if (sliderUmkRatio) sliderUmkRatio.addEventListener('input', calculateLdiAndSalary);
     }
 
     function onProvinceChange() {
@@ -1613,8 +1639,15 @@
 
       badgeUmkValue.textContent = formatRupiah(regItem.umk) + ' / bln';
 
-      // Hitung Rekomendasi Gaji Pokok (UMK * LDI)
-      const calcSalary = Math.round(regItem.umk * ldi);
+      // Porsi Rasio Gaji Pokok dari UMK (Default 60%)
+      const umkRatio = sliderUmkRatio ? (parseFloat(sliderUmkRatio.value) / 100) : 0.60;
+      const baseFromUmk = Math.round(regItem.umk * umkRatio);
+      if (txtUmkRatio) {
+        txtUmkRatio.textContent = Math.round(umkRatio * 100) + '% (' + formatRupiah(baseFromUmk) + ')';
+      }
+
+      // Hitung Rekomendasi Gaji Pokok (Porsi Pokok UMK * LDI)
+      const calcSalary = Math.round(baseFromUmk * ldi);
       currentCalculatedSalary = calcSalary;
 
       // Hitung Rekomendasi Kuota Dasar: Wilayah sulit kuotanya lebih rendah
@@ -1622,8 +1655,9 @@
       currentSuggestedQuota = calcQuota;
 
       const diffPct = Math.round(((calcSalary - regItem.umk) / regItem.umk) * 100);
+      const signStr = diffPct >= 0 ? '+' : '';
       resCalculatedSalary.textContent = formatRupiah(calcSalary);
-      resDiffFromUmk.textContent = '+' + diffPct + '% dari UMK ' + regItem.name;
+      resDiffFromUmk.textContent = Math.round(umkRatio * 100) + '% UMK ' + regItem.name + (diffPct !== 0 ? ' (' + signStr + diffPct + '%)' : '');
       resSuggestedQuota.textContent = calcQuota + ' Paket / hari';
 
       const dailyBase = calcSalary / 25;
