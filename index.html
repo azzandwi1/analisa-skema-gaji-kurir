@@ -68,20 +68,21 @@
       <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
         
         <!-- KALKULATOR OTOMATIS: UMK KABUPATEN & INDEKS KESULITAN -->
-        <div class="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 text-white rounded-2xl p-5 md:p-6 shadow-md space-y-5 border border-slate-800">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-slate-700/80 pb-4">
+        <!-- KALKULATOR OTOMATIS: UMK KABUPATEN & INDEKS KESULITAN (CLEAN LIGHT THEME) -->
+        <div class="bg-sky-50/50 border border-sky-200/80 rounded-2xl p-5 md:p-6 shadow-xs space-y-5">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-sky-100 pb-4">
             <div>
               <div class="flex items-center gap-2">
-                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/30">Otomatisasi UMK & Kesulitan</span>
-                <h3 class="text-base font-bold text-white">Penetapan Gaji Pokok Otomatis (UMK Daerah × Indeks Kesulitan)</h3>
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-sky-100 text-sky-800 border border-sky-200">Otomatisasi UMK & Kesulitan</span>
+                <h3 class="text-base font-bold text-slate-900">Penetapan Gaji Pokok Otomatis (UMK Daerah × Indeks Kesulitan)</h3>
               </div>
-              <p class="text-xs text-slate-300 mt-1">
-                Pilih Kabupaten/Kota untuk memuat UMK resmi, lalu atur faktor kesulitan operasional lapangan (topografi, akses alamat, kemacetan). Sistem otomatis menghitung basic salary dan penyesuaian kuota.
+              <p class="text-xs text-slate-600 mt-1">
+                Pilih Kabupaten/Kota untuk memuat UMK resmi, lalu atur faktor kesulitan operasional lapangan (topografi, akses alamat, kemacetan). Sistem otomatis menyesuaikan basic salary, kuota dasar, serta batas dan tarif tiering.
               </p>
             </div>
-            <div class="flex items-center gap-2 bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-700 text-xs shrink-0">
-              <input type="checkbox" id="checkAutoApply" class="w-4 h-4 accent-sky-500 rounded cursor-pointer" checked>
-              <label for="checkAutoApply" class="text-slate-300 select-none cursor-pointer font-medium">Otomatis sinkron ke simulator</label>
+            <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200 text-xs shrink-0 shadow-xs">
+              <input type="checkbox" id="checkAutoApply" class="w-4 h-4 accent-sky-600 rounded cursor-pointer" checked>
+              <label for="checkAutoApply" class="text-slate-700 select-none cursor-pointer font-medium">Otomatis sinkron ke simulator</label>
             </div>
           </div>
 
@@ -89,63 +90,63 @@
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
             
             <!-- Kolom 1: Pilihan Wilayah (5 cols) -->
-            <div class="lg:col-span-5 space-y-3 bg-slate-800/60 p-4 rounded-xl border border-slate-700">
-              <div class="text-xs font-bold text-sky-300 uppercase tracking-wider flex items-center gap-1.5">
+            <div class="lg:col-span-5 space-y-3 bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+              <div class="text-xs font-bold text-sky-800 uppercase tracking-wider flex items-center gap-1.5">
                 <span>📍</span> 1. Pilih Wilayah Operasional
               </div>
 
               <!-- Dropdown Provinsi -->
               <div class="space-y-1">
-                <label class="text-[11px] font-medium text-slate-300">Provinsi:</label>
-                <select id="selProvince" class="w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-lg px-3 py-2 focus:ring-1 focus:ring-sky-500 focus:outline-none cursor-pointer">
+                <label class="text-[11px] font-medium text-slate-700">Provinsi:</label>
+                <select id="selProvince" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-xs rounded-lg px-3 py-2 focus:ring-1 focus:ring-sky-500 focus:bg-white focus:outline-none cursor-pointer">
                 </select>
               </div>
 
               <!-- Dropdown Kabupaten/Kota -->
               <div class="space-y-1">
-                <label class="text-[11px] font-medium text-slate-300">Kabupaten / Kota:</label>
-                <select id="selRegency" class="w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-lg px-3 py-2 focus:ring-1 focus:ring-sky-500 focus:outline-none cursor-pointer">
+                <label class="text-[11px] font-medium text-slate-700">Kabupaten / Kota:</label>
+                <select id="selRegency" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-xs rounded-lg px-3 py-2 focus:ring-1 focus:ring-sky-500 focus:bg-white focus:outline-none cursor-pointer">
                 </select>
               </div>
 
               <!-- UMK Badge -->
-              <div class="flex justify-between items-center bg-slate-900/90 px-3 py-2 rounded-lg border border-slate-700/80">
-                <span class="text-[11px] text-slate-400">UMK Resmi Acuan:</span>
-                <span id="badgeUmkValue" class="text-xs font-mono font-bold text-amber-300">Rp 5.067.381 / bln</span>
+              <div class="flex justify-between items-center bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
+                <span class="text-[11px] text-amber-900 font-medium">UMK Resmi Acuan:</span>
+                <span id="badgeUmkValue" class="text-xs font-mono font-bold text-amber-800">Rp 5.067.381 / bln</span>
               </div>
 
               <!-- Porsi Rasio Gaji Pokok dari UMK -->
-              <div class="space-y-1.5 pt-1 border-t border-slate-700/60">
+              <div class="space-y-1.5 pt-1 border-t border-slate-100">
                 <div class="flex justify-between items-center text-[11px]">
-                  <span class="text-slate-300 font-medium">Porsi Pokok dari UMK:</span>
-                  <span id="txtUmkRatio" class="font-bold text-sky-400 font-mono">60% (Rp 3.040.428)</span>
+                  <span class="text-slate-700 font-medium">Porsi Pokok dari UMK:</span>
+                  <span id="txtUmkRatio" class="font-bold text-sky-700 font-mono">60% (Rp 3.040.428)</span>
                 </div>
-                <input id="sliderUmkRatio" type="range" min="30" max="100" step="5" value="60" class="w-full accent-sky-400 cursor-pointer">
-                <div class="flex justify-between text-[9px] text-slate-400">
-                  <button type="button" onclick="setUmkRatio(40)" class="cursor-pointer hover:text-white bg-transparent border-0 p-0 text-[9px] text-slate-400">40% (Fleksibel)</button>
-                  <button type="button" onclick="setUmkRatio(60)" class="cursor-pointer hover:text-white bg-transparent border-0 p-0 text-[9px] text-sky-300 font-bold">60% (Standar Hub)</button>
-                  <button type="button" onclick="setUmkRatio(75)" class="cursor-pointer hover:text-white bg-transparent border-0 p-0 text-[9px] text-slate-400">75% (PP 51)</button>
-                  <button type="button" onclick="setUmkRatio(100)" class="cursor-pointer hover:text-white bg-transparent border-0 p-0 text-[9px] text-slate-400">100% (Penuh)</button>
+                <input id="sliderUmkRatio" type="range" min="30" max="100" step="5" value="60" class="w-full accent-sky-600 cursor-pointer">
+                <div class="flex justify-between text-[9px] text-slate-500 font-medium">
+                  <button type="button" onclick="setUmkRatio(40)" class="cursor-pointer hover:text-slate-900 bg-transparent border-0 p-0 text-[9px] text-slate-500">40% (Fleksibel)</button>
+                  <button type="button" onclick="setUmkRatio(60)" class="cursor-pointer hover:text-sky-900 bg-transparent border-0 p-0 text-[9px] text-sky-700 font-bold">60% (Standar Hub)</button>
+                  <button type="button" onclick="setUmkRatio(75)" class="cursor-pointer hover:text-slate-900 bg-transparent border-0 p-0 text-[9px] text-slate-500">75% (PP 51)</button>
+                  <button type="button" onclick="setUmkRatio(100)" class="cursor-pointer hover:text-slate-900 bg-transparent border-0 p-0 text-[9px] text-slate-500">100% (Penuh)</button>
                 </div>
               </div>
             </div>
 
             <!-- Kolom 2: Indeks Kesulitan Wilayah (7 cols) -->
-            <div class="lg:col-span-7 space-y-3 bg-slate-800/60 p-4 rounded-xl border border-slate-700">
+            <div class="lg:col-span-7 space-y-3 bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
               <div class="flex justify-between items-center">
-                <div class="text-xs font-bold text-sky-300 uppercase tracking-wider flex items-center gap-1.5">
+                <div class="text-xs font-bold text-sky-800 uppercase tracking-wider flex items-center gap-1.5">
                   <span>⚙️</span> 2. Profil Kesulitan Lapangan (Difficulty Factors)
                 </div>
-                <div id="badgeLdiScoreContainer" class="text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded border border-emerald-400/30 transition-colors">
+                <div id="badgeLdiScoreContainer" class="text-xs font-mono font-bold bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded border border-emerald-200 transition-colors">
                   Total LDI: <span id="txtLdiScore">1.00x (Mudah)</span>
                 </div>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 <!-- Faktor 1: Topografi -->
-                <div class="bg-slate-900/90 p-2.5 rounded-lg border border-slate-700/70 space-y-1">
-                  <label class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Topografi Medan</label>
-                  <select id="selTopo" class="w-full bg-slate-800 border border-slate-700 text-white text-[11px] rounded px-2 py-1.5 focus:outline-none cursor-pointer">
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
+                  <label class="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Topografi Medan</label>
+                  <select id="selTopo" class="w-full bg-white border border-slate-200 text-slate-800 text-[11px] rounded px-2 py-1.5 focus:outline-none cursor-pointer">
                     <option value="1.00">Datar / Kota (1.00x)</option>
                     <option value="1.10">Berbukit / Pinggiran (1.10x)</option>
                     <option value="1.25">Pegunungan / Ekstrem (1.25x)</option>
@@ -153,9 +154,9 @@
                 </div>
 
                 <!-- Faktor 2: Kerapatan & Alamat -->
-                <div class="bg-slate-900/90 p-2.5 rounded-lg border border-slate-700/70 space-y-1">
-                  <label class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Akses Alamat</label>
-                  <select id="selInfra" class="w-full bg-slate-800 border border-slate-700 text-white text-[11px] rounded px-2 py-1.5 focus:outline-none cursor-pointer">
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
+                  <label class="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Akses Alamat</label>
+                  <select id="selInfra" class="w-full bg-white border border-slate-200 text-slate-800 text-[11px] rounded px-2 py-1.5 focus:outline-none cursor-pointer">
                     <option value="1.00">Rapi / Bernomor (1.00x)</option>
                     <option value="1.08">Gang Padat / Sempit (1.08x)</option>
                     <option value="1.20">Pedesaan / Jalan Rusak (1.20x)</option>
@@ -163,9 +164,9 @@
                 </div>
 
                 <!-- Faktor 3: Kemacetan -->
-                <div class="bg-slate-900/90 p-2.5 rounded-lg border border-slate-700/70 space-y-1">
-                  <label class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Lalu Lintas</label>
-                  <select id="selTraffic" class="w-full bg-slate-800 border border-slate-700 text-white text-[11px] rounded px-2 py-1.5 focus:outline-none cursor-pointer">
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
+                  <label class="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Lalu Lintas</label>
+                  <select id="selTraffic" class="w-full bg-white border border-slate-200 text-slate-800 text-[11px] rounded px-2 py-1.5 focus:outline-none cursor-pointer">
                     <option value="1.00">Lancar / Luar Kota (1.00x)</option>
                     <option value="1.05">Sedang / Jam Sibuk (1.05x)</option>
                     <option value="1.15">Macet Kronis / Red Zone (1.15x)</option>
@@ -175,13 +176,13 @@
 
               <!-- Difficulty Slider for Fine-Tuning -->
               <div class="space-y-1 pt-1">
-                <div class="flex justify-between text-[11px] text-slate-300 font-medium">
+                <div class="flex justify-between text-[11px] text-slate-700 font-medium">
                   <span>Penyesuaian Halus Indeks Kesulitan:</span>
-                  <span id="txtLdiSliderLabel" class="font-bold text-sky-400 font-mono">1.00x</span>
+                  <span id="txtLdiSliderLabel" class="font-bold text-sky-700 font-mono">1.00x (Mudah)</span>
                 </div>
-                <input id="sliderLdi" type="range" min="1.00" max="1.60" step="0.01" value="1.00" class="w-full accent-sky-400 cursor-pointer">
-                <div class="flex justify-between text-[9px] text-slate-400">
-                  <span>1.00x (Mudah / Flat)</span>
+                <input id="sliderLdi" type="range" min="1.00" max="1.60" step="0.01" value="1.00" class="w-full accent-sky-600 cursor-pointer">
+                <div class="flex justify-between text-[9px] text-slate-400 font-medium">
+                  <span>1.00x (Mudah / Datar)</span>
                   <span>1.25x (Menengah)</span>
                   <span>1.60x (Sangat Sulit / 3T)</span>
                 </div>
@@ -191,26 +192,26 @@
           </div>
 
           <!-- Result Banner & Action Button -->
-          <div class="bg-slate-950/90 border border-slate-700/80 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-xs">
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 w-full sm:w-auto">
               <div>
-                <div class="text-[10px] uppercase text-slate-400 font-semibold">Hasil Gaji Pokok Terhitung:</div>
-                <div id="resCalculatedSalary" class="text-lg md:text-xl font-bold font-mono text-emerald-400">Rp 5.067.381</div>
-                <div id="resDiffFromUmk" class="text-[10px] text-emerald-300 font-medium">+0% dari UMK daerah</div>
+                <div class="text-[10px] uppercase text-slate-500 font-semibold">Hasil Gaji Pokok Terhitung:</div>
+                <div id="resCalculatedSalary" class="text-lg md:text-xl font-bold font-mono text-emerald-700">Rp 5.067.381</div>
+                <div id="resDiffFromUmk" class="text-[10px] text-emerald-800 font-medium">+0% dari UMK daerah</div>
               </div>
               <div>
-                <div class="text-[10px] uppercase text-slate-400 font-semibold">Rekomendasi Kuota Dasar:</div>
-                <div id="resSuggestedQuota" class="text-lg md:text-xl font-bold font-mono text-sky-400">50 Paket / hari</div>
-                <div class="text-[10px] text-slate-400 font-medium">Penutup beban pokok kurir</div>
+                <div class="text-[10px] uppercase text-slate-500 font-semibold">Rekomendasi Kuota Dasar:</div>
+                <div id="resSuggestedQuota" class="text-lg md:text-xl font-bold font-mono text-sky-700">50 Paket / hari</div>
+                <div class="text-[10px] text-slate-500 font-medium">Penutup beban pokok kurir</div>
               </div>
-              <div class="col-span-2 sm:col-span-1 border-t sm:border-t-0 sm:border-l border-slate-800 pt-2 sm:pt-0 sm:pl-4">
-                <div class="text-[10px] uppercase text-slate-400 font-semibold">Beban Pokok per Paket:</div>
-                <div id="resBaseCpD" class="text-sm md:text-base font-bold font-mono text-amber-400">Rp 4.054 / pkt</div>
-                <div class="text-[10px] text-slate-400">Gaji harian / kuota dasar</div>
+              <div class="col-span-2 sm:col-span-1 border-t sm:border-t-0 sm:border-l border-slate-200 pt-2 sm:pt-0 sm:pl-4">
+                <div class="text-[10px] uppercase text-slate-500 font-semibold">Beban Pokok per Paket:</div>
+                <div id="resBaseCpD" class="text-sm md:text-base font-bold font-mono text-amber-800">Rp 4.054 / pkt</div>
+                <div class="text-[10px] text-slate-500">Gaji harian / kuota dasar</div>
               </div>
             </div>
 
-            <button onclick="applyAutoBaselineToSimulator()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 transition flex items-center justify-center gap-2 shadow-sm shrink-0 cursor-pointer">
+            <button onclick="applyAutoBaselineToSimulator()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white transition flex items-center justify-center gap-2 shadow-sm shrink-0 cursor-pointer">
               <span>⚡</span> Terapkan ke Simulator
             </button>
           </div>
@@ -362,7 +363,10 @@
               <span class="text-xs text-slate-800 font-bold uppercase tracking-wide">1. Skema Hibrida</span>
               <span id="badgeSlaHybrid" class="text-[9px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.2 rounded">+ Pengali SLA</span>
             </div>
-            <div class="text-xs text-slate-500 mt-0.5">Gaji pokok menutup kuota dasar + insentif bertingkat (gaji murni)</div>
+            <div class="text-xs text-slate-500 mt-0.5">Gaji pokok menutup kuota dasar + insentif bertingkat (adaptif LDI)</div>
+            <div id="txtHybTierInfo" class="mt-2 text-[10px] text-emerald-800 bg-emerald-50/80 border border-emerald-200/80 px-2 py-1 rounded font-mono leading-tight">
+              T1: 51-80 pkt (@Rp 1.600) &bull; T2: 81-105 pkt (@Rp 2.200) &bull; T3: &gt;105 pkt (@Rp 2.500)
+            </div>
             
             <div class="mt-4 pt-3 border-t border-slate-100 space-y-2">
               <div>
@@ -392,7 +396,7 @@
         <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
           <div>
             <div class="text-xs text-slate-800 font-bold uppercase tracking-wide">2. Komisi Murni per Paket</div>
-            <div class="text-xs text-slate-500 mt-0.5">Mitra komisi flat Rp 2.500 / paket (gaji murni, tanpa uang jalan)</div>
+            <div id="txtPieSubtitle" class="text-xs text-slate-500 mt-0.5">Mitra komisi flat Rp 2.500 / paket (adaptif LDI, gaji murni)</div>
             
             <div class="mt-4 pt-3 border-t border-slate-100 space-y-2">
               <div>
@@ -452,7 +456,7 @@
         <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
           <div>
             <div class="text-xs text-slate-800 font-bold uppercase tracking-wide">4. Target Kuota Minimal</div>
-            <div class="text-xs text-slate-500 mt-0.5">Gaji pokok + bonus jika tembus target harian (gaji murni)</div>
+            <div id="txtQtaSubtitle" class="text-xs text-slate-500 mt-0.5">Gaji pokok + bonus jika tembus target harian (adaptif LDI, gaji murni)</div>
             
             <div class="mt-4 pt-3 border-t border-slate-100 space-y-2">
               <div>
@@ -687,10 +691,12 @@
           </p>
 
           <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl font-mono text-[11px] text-slate-800 space-y-1">
-            <div class="text-slate-500 font-sans font-semibold">// 1. Insentif Progresif I(V):</div>
-            <div>• Tier 1 (Q_base s/d Q_base + 30) : Rp 1.600 / paket</div>
-            <div>• Tier 2 (Q_base + 31 s/d Q_base + 55): Rp 2.200 / paket</div>
-            <div>• Tier 3 (Di atas Q_base + 55)   : Rp 2.500 / paket</div>
+            <div class="text-slate-500 font-sans font-semibold">// 1. Insentif Progresif I(V) Adaptif LDI:</div>
+            <div>• Rentang Span: Span1 = round(30 / LDI) | Span2 = round(25 / LDI)</div>
+            <div>• Tarif Tier : Rate = round(Rate_dasar × LDI)</div>
+            <div>• Tier 1 (Q_base s/d Q_base + Span1): round(1.600 × LDI) / paket</div>
+            <div>• Tier 2 (T1_max s/d T1_max + Span2): round(2.200 × LDI) / paket</div>
+            <div>• Tier 3 (Di atas T2_max)           : round(2.500 × LDI) / paket</div>
             <div class="pt-1.5 text-slate-500 font-sans font-semibold">// 2. Penyesuaian Kualitas:</div>
             <div>Insentif_Akhir = I(V) × M_SLA</div>
             <div class="pt-1.5 text-slate-500 font-sans font-semibold">// 3. Upah & Biaya Murni:</div>
@@ -699,7 +705,7 @@
             <div>CpD = Upah_Harian / V</div>
           </div>
           <div class="text-[11px] text-slate-500 italic">
-            Contoh (Q_base=50, V=80, SLA=97%): Kurir dapat pokok Rp 140.000 + (30 pkt × Rp 1.600 × 1.05) = Rp 190.400/hari (~Rp 4.760.000/bln).
+            Contoh Medan Sulit (LDI=1.25x): Kuota dasar = 40 pkt. Span Tier 1 = 24 pkt (@ Rp 2.000), Tier 2 = 20 pkt (@ Rp 2.750). Kurir lebih cepat tembus tier dan dibayar lebih tinggi per paket karena rute berat.
           </div>
         </div>
 
@@ -710,18 +716,18 @@
             <span class="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded">Mitra Lepas</span>
           </div>
           <p class="text-xs text-slate-600 leading-relaxed">
-            Kurir tidak memiliki gaji pokok sama sekali (<code class="bg-slate-100 px-1 py-0.5 rounded font-mono text-[11px]">W_hari = 0</code>). Penghasilan murni dihitung dari jumlah paket dikali komisi flat per paket:
+            Kurir tidak memiliki gaji pokok sama sekali (<code class="bg-slate-100 px-1 py-0.5 rounded font-mono text-[11px]">W_hari = 0</code>). Komisi flat per paket disesuaikan dengan tingkat kesulitan medan:
           </p>
 
           <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl font-mono text-[11px] text-slate-800 space-y-1">
-            <div class="text-slate-500 font-sans font-semibold">// Formulasi Komisi Murni:</div>
-            <div>Tarif_Komisi = Rp 2.500 / paket</div>
-            <div>Upah_Harian = V × Rp 2.500</div>
+            <div class="text-slate-500 font-sans font-semibold">// Formulasi Komisi Murni Adaptif LDI:</div>
+            <div>Tarif_Komisi = round(Rp 2.500 × LDI) / paket</div>
+            <div>Upah_Harian = V × Tarif_Komisi</div>
             <div>Take_Home_Pay = Upah_Harian × 25</div>
-            <div>CpD = Rp 2.500 (Selalu Konstan)</div>
+            <div>CpD = Tarif_Komisi (Konstan di tiap wilayah)</div>
           </div>
           <div class="text-[11px] text-slate-500 italic">
-            Contoh (V=80): Upah = 80 × Rp 2.500 = Rp 200.000/hari (~Rp 5.000.000/bln). Namun saat volume anjlok ke 30 paket, upah kurir jatuh ke Rp 75.000/hari (~Rp 1.875.000/bln).
+            Contoh (LDI=1.20x, V=60): Tarif komisi = Rp 3.000/paket. Upah = 60 × Rp 3.000 = Rp 180.000/hari (~Rp 4.500.000/bln).
           </div>
         </div>
 
@@ -753,14 +759,15 @@
             <span class="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded">Sistem Tebing</span>
           </div>
           <p class="text-xs text-slate-600 leading-relaxed">
-            Kurir digaji pokok harian, namun bonus hanya cair jika menembus ambang batas minimal (<code class="bg-slate-100 px-1 py-0.5 rounded font-mono text-[11px]">Q_target = Q_base + 15</code>):
+            Kurir digaji pokok harian, namun bonus tebing hanya cair jika menembus ambang batas minimal adaptif LDI:
           </p>
 
           <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl font-mono text-[11px] text-slate-800 space-y-1">
-            <div class="text-slate-500 font-sans font-semibold">// Logika Ambang Tebing:</div>
-            <div>Ambang_Target = Q_base + 15</div>
+            <div class="text-slate-500 font-sans font-semibold">// Logika Ambang Tebing Adaptif LDI:</div>
+            <div>Ambang_Target = Q_base + round(15 / LDI)</div>
+            <div>Tarif_Bonus = round(Rp 1.600 × LDI) / paket</div>
             <div>Jika V &lt; Ambang_Target: Bonus = 0</div>
-            <div>Jika V ≥ Ambang_Target: Bonus = (V - Q_base) × Rp 1.600</div>
+            <div>Jika V ≥ Ambang_Target: Bonus = (V - Q_base) × Tarif_Bonus</div>
             <div>Upah_Harian = W_hari + Bonus</div>
             <div>Take_Home_Pay = Upah_Harian × 25</div>
             <div>CpD = Upah_Harian / V</div>
@@ -1281,12 +1288,25 @@
         else slaMult = 0.80;
       }
 
-      // Dynamic Tiers based on user's custom baseQuota
-      const t1Max = baseQuota + 30;
-      const t2Max = baseQuota + 55;
-      const t1Rate = 1600;
-      const t2Rate = 2200;
-      const t3Rate = 2500;
+      // Dynamic Tiers influenced by LDI and baseQuota
+      const ldiFactor = (typeof currentLdi !== 'undefined' && currentLdi > 0) ? currentLdi : 1.0;
+
+      // Rentang kuota per tier adaptif LDI: di medan berat, span paket lebih realistis
+      const t1Span = Math.max(8, Math.round(30 / ldiFactor));
+      const t2Span = Math.max(8, Math.round(25 / ldiFactor));
+      const t1Max = baseQuota + t1Span;
+      const t2Max = t1Max + t2Span;
+
+      // Tarif insentif per paket adaptif LDI: kompensasi ekstra untuk waktu & medan sulit
+      const t1Rate = Math.round(1600 * ldiFactor);
+      const t2Rate = Math.round(2200 * ldiFactor);
+      const t3Rate = Math.round(2500 * ldiFactor);
+
+      // Update rincian tier di kartu Skema Hibrida
+      const txtHybTierInfo = document.getElementById('txtHybTierInfo');
+      if (txtHybTierInfo) {
+        txtHybTierInfo.innerHTML = `T1: ${baseQuota+1}-${t1Max} pkt (@${formatRupiah(t1Rate)}) &bull; T2: ${t1Max+1}-${t2Max} pkt (@${formatRupiah(t2Rate)}) &bull; T3: &gt;${t2Max} pkt (@${formatRupiah(t3Rate)})`;
+      }
 
       // 1. SKEMA HYBRID TIERED (Gaji Murni, Tanpa Uang Jalan)
       let inc = 0;
@@ -1300,8 +1320,13 @@
       const hybNetProf = grossRev - hybTotalCost;
       const hybMargin = grossRev > 0 ? ((hybNetProf / grossRev) * 100) : 0;
 
-      // 2. SKEMA PIECE-RATE MURNI (Komisi Murni Rp 2.500/pkt, Tanpa Uang Jalan)
-      const pieDaily = 2500 * v;
+      // 2. SKEMA PIECE-RATE MURNI (Komisi Murni adaptif LDI, Tanpa Uang Jalan)
+      const pieRate = Math.round(2500 * ldiFactor);
+      const txtPieSubtitle = document.getElementById('txtPieSubtitle');
+      if (txtPieSubtitle) {
+        txtPieSubtitle.textContent = `Mitra komisi flat ${formatRupiah(pieRate)} / paket (LDI: ${ldiFactor.toFixed(2)}x, gaji murni)`;
+      }
+      const pieDaily = pieRate * v;
       const pieTHP = pieDaily * days;
       const pieCpD = v > 0 ? (pieDaily / v) : 0;
       const pieTotalCost = (pieDaily + (v * hubOps)) * fleet * days;
@@ -1316,10 +1341,15 @@
       const fixNetProf = grossRev - fixTotalCost;
       const fixMargin = grossRev > 0 ? ((fixNetProf / grossRev) * 100) : 0;
 
-      // 4. SKEMA TARGET QUOTA BONUS (Gaji Murni + Bonus Tebing, Tanpa Uang Jalan)
+      // 4. SKEMA TARGET QUOTA BONUS (Gaji Murni + Bonus Tebing adaptif LDI, Tanpa Uang Jalan)
       let qtaBonus = 0;
-      let qtaThreshold = baseQuota + 15;
+      const qtaSpan = Math.max(5, Math.round(15 / ldiFactor));
+      const qtaThreshold = baseQuota + qtaSpan;
       if (v >= qtaThreshold) qtaBonus = (v - baseQuota) * t1Rate;
+      const txtQtaSubtitle = document.getElementById('txtQtaSubtitle');
+      if (txtQtaSubtitle) {
+        txtQtaSubtitle.textContent = `Pokok + bonus jika ≥ ${qtaThreshold} pkt (@ ${formatRupiah(t1Rate)} / pkt ekstra, adaptif LDI)`;
+      }
       const qtaDaily = baseDaily + qtaBonus;
       const qtaTHP = qtaDaily * days;
       const qtaCpD = v > 0 ? (qtaDaily / v) : 0;
@@ -1572,6 +1602,7 @@
 
     let currentCalculatedSalary = 3500000;
     let currentSuggestedQuota = 50;
+    let currentLdi = 1.00;
 
     function setUmkRatio(val) {
       if (sliderUmkRatio) {
@@ -1634,17 +1665,18 @@
       const regItem = list[regIdx] || list[0] || { name: "Standar", umk: 3500000 };
 
       const ldi = parseFloat(sliderLdi.value);
+      currentLdi = ldi;
       let ldiLabel = 'Mudah';
-      let ldiClass = 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30';
-      let ldiSliderClass = 'font-bold text-emerald-400 font-mono';
+      let ldiClass = 'bg-emerald-50 text-emerald-800 border-emerald-300';
+      let ldiSliderClass = 'font-bold text-emerald-700 font-mono';
       if (ldi > 1.30) {
         ldiLabel = 'Ekstrem';
-        ldiClass = 'bg-rose-500/20 text-rose-300 border-rose-400/30';
-        ldiSliderClass = 'font-bold text-rose-400 font-mono';
+        ldiClass = 'bg-rose-50 text-rose-800 border-rose-300';
+        ldiSliderClass = 'font-bold text-rose-700 font-mono';
       } else if (ldi > 1.12) {
         ldiLabel = 'Menengah';
-        ldiClass = 'bg-amber-500/20 text-amber-300 border-amber-400/30';
-        ldiSliderClass = 'font-bold text-amber-400 font-mono';
+        ldiClass = 'bg-amber-50 text-amber-800 border-amber-300';
+        ldiSliderClass = 'font-bold text-amber-700 font-mono';
       }
 
       txtLdiScore.textContent = ldi.toFixed(2) + 'x (' + ldiLabel + ')';
@@ -1684,10 +1716,14 @@
 
       if (checkAutoApply && checkAutoApply.checked) {
         applyAutoBaselineToSimulator();
+      } else {
+        // Tetap refresh kalkulasi simulator dengan LDI terbaru
+        calculateAll();
       }
     }
 
     function applyAutoBaselineToSimulator() {
+      currentLdi = parseFloat(sliderLdi.value);
       sliderBaseMonthly.value = currentCalculatedSalary;
       sliderBaseQuota.value = currentSuggestedQuota;
       calculateAll();
