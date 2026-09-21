@@ -15,29 +15,41 @@ Proyek ini menyediakan model analitik dan dashboard interaktif untuk membandingk
 Dashboard ini dirancang khusus dengan konteks ketenagakerjaan di Indonesia (PP No. 51/2023) dan didukung literatur ilmiah operasional (*Management Science*, *M&SOM*, *Quarterly Journal of Economics*).
 
 ### 🌟 Fitur Baru: Auto-Calculator UMK & Logistics Difficulty Index (LDI)
-* **Database UMK Kabupaten/Kota:** Pilihan daerah terintegrasi dari DKI Jakarta, Jawa Barat (Kota Bekasi, Karawang, Bandung, dll.), Jawa Tengah, Jawa Timur, Banten, Sumatera, Bali, Kalimantan, Sulawesi, hingga Papua.
+* **Database Wilayah & Fixed UMK Salary:** Pilihan daerah terintegrasi 3 tingkat (**Region** &rarr; **Kabupaten/Kota** &rarr; **Kecamatan**) mencakup 8 Region (Jabodetabek, Jawa, Bali, Nusra, Sumatera, Kalimantan, Sulawesi, Indotim), 479 Kabupaten/Kota, dan 7.367+ Kecamatan dengan nilai acuan *Fixed UMK Salary* hasil olahan riil.
 * **Faktor Kesulitan Lapangan (Multi-Index):**
   1. *Topografi Medan* (Datar: 1.00x, Berbukit: 1.10x, Pegunungan/Ekstrem: 1.25x)
   2. *Kerapatan Alamat & Jalan* (Rapi: 1.00x, Gang Sempit/Padat: 1.08x, Pedesaan/Jalan Rusak: 1.20x)
   3. *Kemacetan Lalu Lintas* (Lancar: 1.00x, Sedang: 1.05x, Macet Kronis: 1.15x)
 * **Kalkulasi & Sinkronisasi Otomatis:**
-  * Rekomendasi Gaji Pokok: $W_{bln} = UMK \times LDI$
+  * Rekomendasi Gaji Pokok: $W_{bln} = \text{Fixed\_UMK} \times \text{Porsi} \times LDI$
   * Rekomendasi Kuota Dasar: $Q_{base} = \text{round}(50 / LDI)$
   * Sekali klik untuk langsung diterapkan ke simulator dan tabel laba rugi.
+
+### 📊 Fitur Baru: Komparasi Payroll 3 Bulan (Existing vs Full Skema Baru)
+* **Data Realisasi Historis 3 Bulan (Juni, Juli, Agustus):** Mengintegrasikan data pembukuan riil dari 3 skema yang berjalan (*Skema Baru*: Rp 12,96 M, *Kurir Flat & Lama*: Rp 1,09 M, *Kurir Mitra*: Rp 2,43 M &rarr; **Total Existing: Rp 16,48 Miliar**).
+* **Penyelarasan Loadment Aktual (Google Spreadsheet):** Dihitung berdasarkan volume kiriman riil 5,88 Juta Kilogram dari 7.388 kecamatan (Juni: 1,80 Juta Kg, Juli: 2,22 Juta Kg, Agustus: 1,87 Juta Kg).
+* **Head-to-Head Bulanan & Visualisasi Interaktif:**
+  * Dilengkapi pilihan skenario: **Skenario A (Rute Optimal / Konsolidasi Kuota 44-50 kg)** & **Skenario B (Baseline Konversi 1:1)**.
+  * Hasil Skenario Rekomendasi: **Menghemat Anggaran Rp 1.154.932.947 (-7,0%)** dalam 3 bulan, memangkas *Unit Cost* dari **Rp 2.803/kg** menjadi **Rp 2.607/kg**.
+  * Dilengkapi grafik Chart.js *Stacked Bar Chart* bulanan dan tren efisiensi biaya per kilogram.
+
 
 ---
 
 ## 📂 Struktur File Repository
 
 ```text
-├── index.html                   # Dashboard simulator interaktif (Single-file HTML + Tailwind CSS + Vanilla JS)
+├── index.html                           # Dashboard simulator interaktif (Tailwind CSS + Chart.js + Vanilla JS)
 ├── assets/
-│   └── grafik_simulasi_kompensasi.png   # Grafik 4-panel visualisasi perbandingan skema
+│   ├── region_data.js                   # Database 8 Region, 479 Kab/Kota, 7.367 Kecamatan & Fixed UMK Salary
+│   └── grafik_simulasi_kompensasi.png   # Grafik 4-panel visualisasi perbandingan 4 skema
 ├── scripts/
-│   ├── simulasi_kompensasi.py   # Script simulasi matematis kompensasi kurir
-│   ├── simulasi_fleet.py        # Script simulasi keuangan hub skala 50 armada kurir
-│   └── generate_charts.py       # Script penghasil grafik visualisasi matplotlib
-└── README.md                    # Dokumentasi lengkap proyek
+│   ├── simulasi_kompensasi.py           # Script simulasi matematis kompensasi kurir (4 skema + LDI)
+│   ├── simulasi_fleet.py                # Script simulasi keuangan hub skala 50 armada kurir
+│   ├── generate_charts.py               # Script penghasil grafik visualisasi matplotlib (4 panel)
+│   ├── test_simulation.py              # Automated unit tests verifikasi matematis
+│   └── test_web_integration.py         # Automated verifikasi integrasi dataset wilayah
+└── README.md                            # Dokumentasi lengkap proyek
 ```
 
 ---
@@ -49,18 +61,21 @@ Cukup buka file `index.html` menggunakan browser modern (Google Chrome, Microsof
 Tidak membutuhkan server web khusus atau instalasi backend (dapat berjalan *offline* / *client-side*).
 
 ### 2. Jalankan Script Simulasi Python (Opsional)
-Jika Anda ingin menjalankan simulasi komputasi numerik di terminal:
+Jika Anda ingin menjalankan simulasi komputasi numerik dan automated test di terminal:
 ```bash
-# Pastikan Python dan matplotlib terinstall
+# Pastikan dependensi terinstall
 pip install matplotlib
 
-# Jalankan simulasi kompensasi per kurir
+# Jalankan automated unit tests
+python scripts/test_simulation.py
+
+# Jalankan simulasi kompensasi per kurir (4 skema)
 python scripts/simulasi_kompensasi.py
 
 # Jalankan simulasi keuangan armada hub cabang
 python scripts/simulasi_fleet.py
 
-# Buat ulang grafik perbandingan
+# Buat ulang grafik 4 skema
 python scripts/generate_charts.py
 ```
 

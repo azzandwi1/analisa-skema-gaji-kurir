@@ -1,91 +1,137 @@
 """
-Simulasi Model Kompensasi Kurir: Hybrid Tiered vs Pure Piece-Rate vs Pure Fixed
+Simulasi Model Kompensasi Kurir: Hybrid Tiered vs Pure Piece-Rate vs Pure Fixed vs Target Quota (Cliff Bonus)
 Analisis Unit Economics, Margin Perusahaan, dan Take Home Pay Kurir saat Volume Bertambah.
+Tersinkronisasi penuh dengan model matematis pada dashboard web (index.html).
 """
 
-def simulate_courier_day(volume, model="hybrid", sla_score=0.98):
-    # Asumsi Pendapatan Perusahaan (Last Mile Delivery Fee dari E-commerce/Klien)
-    revenue_per_parcel = 8500  # Rp 8.500 per paket berhasil antar
+def simulate_courier_day(
+    volume,
+    model="hybrid",
+    base_monthly=3500000,
+    base_quota=50,
+    ldi=1.00,
+    sla_score=0.97,
+    use_sla=True,
+    revenue_per_parcel=8500,
+    hub_ops_per_parcel=2500,
+    include_fuel=False,
+    days=25
+):
+    """
+    Menghitung kompensasi harian & bulanan seorang kurir serta unit economics cabang.
     
-    # Biaya operasional non-kurir (Sortir HUB, app tech, line-haul amortized per paket)
-    hub_ops_per_parcel = 2500  # Rp 2.500 per paket
+    Parameter:
+    - volume: Jumlah paket berhasil antar per hari
+    - model: 'hybrid', 'piece_rate', 'fixed', atau 'quota'
+    - base_monthly: Acuan gaji pokok bulanan (Rp)
+    - base_quota: Kuota paket dasar penutup gaji pokok (paket/hari)
+    - ldi: Logistics Difficulty Index (faktor kesulitan topografi, infra, traffic)
+    - sla_score: Skor keberhasilan antar FADR (0.80 - 1.00)
+    - use_sla: Boolean apakah pengali kualitas SLA aktif
+    - revenue_per_parcel: Pendapatan ongkir yang diterima cabang per paket (Rp)
+    - hub_ops_per_parcel: Biaya sortir & operasional gudang hub per paket (Rp)
+    - include_fuel: Boolean apakah tunjangan bahan bakar dimasukkan ke upah kurir (default: False = upah murni)
+    - days: Jumlah hari kerja efektif per bulan (default: 25)
+    """
+    base_daily = base_monthly / days
     
-    # Tunjangan BBM riil per paket (makin banyak paket dalam cluster, cost per paket makin efisien)
-    # Density effect: 40 paket = Rp 600/pkt, 100 paket = Rp 400/pkt
-    fuel_allowance_per_parcel = max(350, 700 - (volume * 3.5))
+    # 1. Parameter Adaptif LDI (Logistics Difficulty Index)
+    t1_span = max(8, round(30 / ldi))
+    t2_span = max(8, round(25 / ldi))
+    t1_max = base_quota + t1_span
+    t2_max = t1_max + t2_span
     
-    # 1. MODEL HYBRID (Rekomendasi)
-    # Gaji Pokok Harian = Rp 140.000 (Setara UMR ~Rp 3,5jt - 3,8jt / 25 hari kerja)
-    # Kuota dasar = 50 paket (tercover gaji pokok)
-    # Tier 1 (51 - 80) = Rp 1.500 / pkt
-    # Tier 2 (81 - 110) = Rp 2.200 / pkt
-    # Tier 3 (> 110) = Rp 2.500 / pkt (capped at 130 max safe)
-    if model == "hybrid":
-        base_salary = 140000
-        quota = 50
-        
-        # Hitung insentif bertingkat
-        incentive = 0
-        if volume > 50:
-            tier1 = min(volume, 80) - 50
-            incentive += tier1 * 1500
-        if volume > 80:
-            tier2 = min(volume, 110) - 80
-            incentive += tier2 * 2200
-        if volume > 110:
-            tier3 = min(volume, 130) - 110
-            incentive += tier3 * 2500
-            
-        # Quality Multiplier berdasarkan SLA
-        # Jika SLA >= 0.96 -> 1.05x, 0.90 - 0.95 -> 1.0x, < 0.90 -> 0.8x
+    t1_rate = round(1600 * ldi)
+    t2_rate = round(2200 * ldi)
+    t3_rate = round(2500 * ldi)
+    pie_rate = round(2500 * ldi)
+    
+    # 2. SLA Quality Multiplier
+    sla_mult = 1.00
+    if use_sla:
         if sla_score >= 0.96:
-            quality_multiplier = 1.05
+            sla_mult = 1.05
         elif sla_score >= 0.90:
-            quality_multiplier = 1.00
+            sla_mult = 1.00
         else:
-            quality_multiplier = 0.80
+            sla_mult = 0.80
             
-        courier_pay = base_salary + (incentive * quality_multiplier) + (fuel_allowance_per_parcel * volume)
+    # 3. Perhitungan Upah Berdasarkan Skema
+    if model == "hybrid":
+        # Gaji pokok + bonus berjenjang progresif + pengali SLA
+        incentive = 0
+        if volume > base_quota:
+            incentive += (min(volume, t1_max) - base_quota) * t1_rate
+        if volume > t1_max:
+            incentive += (min(volume, t2_max) - t1_max) * t2_rate
+        if volume > t2_max:
+            incentive += (volume - t2_max) * t3_rate
+        daily_pay = base_daily + (incentive * sla_mult)
         
-    # 2. MODEL PURE PIECE-RATE (Komisi Murni Tanpa Gaji Pokok)
-    # Rata-rata industri: Rp 2.300/paket flat + BBM Rp 400/pkt
     elif model == "piece_rate":
-        commission_per_parcel = 2300
-        courier_pay = (commission_per_parcel + fuel_allowance_per_parcel) * volume
+        # Komisi murni per paket (tanpa gaji pokok)
+        daily_pay = pie_rate * volume
         
-    # 3. MODEL PURE FIXED (Gaji Pokok Flat Tanpa Insentif)
-    # Gaji harian Rp 180.000 + BBM Rp 400/pkt
     elif model == "fixed":
-        base_salary = 180000
-        courier_pay = base_salary + (fuel_allowance_per_parcel * volume)
-
-    # Perhitungan Finansial Perusahaan
-    gross_revenue = volume * revenue_per_parcel
-    total_courier_cost = courier_pay
-    total_hub_ops = volume * hub_ops_per_parcel
-    total_company_cost = total_courier_cost + total_hub_ops
-    net_profit = gross_revenue - total_company_cost
+        # Gaji tetap flat per hari (tanpa insentif volume)
+        daily_pay = base_daily
+        
+    elif model == "quota":
+        # Target kuota minimal (gaji pokok + cliff bonus jika tembus ambang)
+        qta_span = max(5, round(15 / ldi))
+        qta_threshold = base_quota + qta_span
+        bonus = 0
+        if volume >= qta_threshold:
+            bonus = (volume - base_quota) * t1_rate
+        daily_pay = base_daily + bonus
+        
+    else:
+        raise ValueError(f"Model '{model}' tidak dikenal. Pilih: 'hybrid', 'piece_rate', 'fixed', atau 'quota'.")
+        
+    # Komponen Tunjangan BBM (Opsional jika ingin dihitung gabung)
+    fuel_per_parcel = max(350, 700 - (volume * 3.5)) if include_fuel else 0
+    daily_pay += fuel_per_parcel * volume
     
-    cpd = total_courier_cost / volume if volume > 0 else 0
-    profit_margin_pct = (net_profit / gross_revenue) * 100 if gross_revenue > 0 else 0
+    # Perhitungan Finansial & Unit Economics
+    monthly_thp = daily_pay * days
+    cpd = daily_pay / volume if volume > 0 else 0
+    gross_revenue = volume * revenue_per_parcel
+    hub_ops_cost = volume * hub_ops_per_parcel
+    total_hub_cost = daily_pay + hub_ops_cost
+    net_profit = gross_revenue - total_hub_cost
+    margin_pct = (net_profit / gross_revenue) * 100 if gross_revenue > 0 else 0
     
     return {
         "volume": volume,
         "model": model,
-        "revenue": gross_revenue,
-        "courier_pay": courier_pay,
+        "daily_pay": daily_pay,
+        "monthly_thp": monthly_thp,
         "cpd": cpd,
+        "revenue": gross_revenue,
+        "total_cost": total_hub_cost,
         "net_profit": net_profit,
-        "margin_pct": profit_margin_pct,
-        "monthly_thp": courier_pay * 25 # 25 hari kerja
+        "margin_pct": margin_pct,
+        "t1_max": t1_max,
+        "t2_max": t2_max,
+        "t1_rate": t1_rate,
+        "t2_rate": t2_rate,
+        "t3_rate": t3_rate,
+        "pie_rate": pie_rate
     }
 
-print(f"{'Volume':<8} | {'Model':<12} | {'Kurir THP/Hari':<15} | {'Kurir THP/Bln':<15} | {'Biaya Kurir/Pkt':<16} | {'Net Profit/Hari':<16} | {'Margin %':<8}")
-print("-" * 100)
-
-volumes = [40, 50, 70, 85, 100, 120]
-for v in volumes:
-    for m in ["hybrid", "piece_rate", "fixed"]:
-        res = simulate_courier_day(v, model=m)
-        print(f"{res['volume']:<8} | {res['model']:<12} | Rp {res['courier_pay']:>10,.0f} | Rp {res['monthly_thp']:>10,.0f} | Rp {res['cpd']:>11,.0f} | Rp {res['net_profit']:>11,.0f} | {res['margin_pct']:>6.1f}%")
-    print("-" * 100)
+if __name__ == "__main__":
+    print("=" * 115)
+    print("SIMULASI KOMPENSASI KURIR (4 SKEMA) - ACUAN UMK RP 3.5 JT (KUOTA 50 PKT/HARI, LDI 1.0x, SLA 97%)")
+    print("=" * 115)
+    header = f"{'Volume':<8} | {'Model':<14} | {'Upah Harian':<16} | {'THP Kurir/Bln':<16} | {'Biaya/Pkt (CpD)':<16} | {'Net Profit/Hari':<16} | {'Margin %':<8}"
+    print(header)
+    print("-" * 115)
+    
+    volumes = [40, 50, 70, 80, 100, 120]
+    models = ["hybrid", "piece_rate", "fixed", "quota"]
+    
+    for v in volumes:
+        for m in models:
+            res = simulate_courier_day(v, model=m, base_monthly=3500000, base_quota=50, ldi=1.00, sla_score=0.97)
+            print(f"{res['volume']:<8} | {res['model']:<14} | Rp {res['daily_pay']:>11,.0f} | Rp {res['monthly_thp']:>11,.0f} | Rp {res['cpd']:>11,.0f} | Rp {res['net_profit']:>11,.0f} | {res['margin_pct']:>6.1f}%")
+        print("-" * 115)

@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kompensasi Kurir Logistik: Simulator Multi-Skema & Landasan Ilmiah</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="assets/region_data.js"></script>
   <style>
     /* Light theme scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -47,6 +49,10 @@
     <div class="flex border-b border-slate-200 bg-slate-100 rounded-xl p-1 gap-2 overflow-x-auto">
       <button onclick="switchTab('tab-sim')" id="btn-tab-sim" class="tab-btn active px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 whitespace-nowrap">
         Simulator Gaji & Biaya
+      </button>
+      <button onclick="switchTab('tab-compare')" id="btn-tab-compare" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-2 whitespace-nowrap">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+        Komparasi Payroll 3 Bulan (Existing vs Skema Baru)
       </button>
       <button onclick="switchTab('tab-formulas')" id="btn-tab-formulas" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-2 whitespace-nowrap">
         Rumus & Formulasi Model
@@ -95,10 +101,10 @@
                 <span>📍</span> 1. Pilih Wilayah Operasional
               </div>
 
-              <!-- Dropdown Provinsi -->
+              <!-- Dropdown Region -->
               <div class="space-y-1">
-                <label class="text-[11px] font-medium text-slate-700">Provinsi:</label>
-                <select id="selProvince" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-xs rounded-lg px-3 py-2 focus:ring-1 focus:ring-sky-500 focus:bg-white focus:outline-none cursor-pointer">
+                <label class="text-[11px] font-medium text-slate-700">Region:</label>
+                <select id="selRegion" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-xs rounded-lg px-3 py-2 focus:ring-1 focus:ring-sky-500 focus:bg-white focus:outline-none cursor-pointer">
                 </select>
               </div>
 
@@ -109,10 +115,20 @@
                 </select>
               </div>
 
+              <!-- Dropdown Kecamatan -->
+              <div class="space-y-1">
+                <label class="text-[11px] font-medium text-slate-700">Kecamatan:</label>
+                <select id="selDistrict" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-xs rounded-lg px-3 py-2 focus:ring-1 focus:ring-sky-500 focus:bg-white focus:outline-none cursor-pointer">
+                </select>
+              </div>
+
               <!-- UMK Badge -->
               <div class="flex justify-between items-center bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
-                <span class="text-[11px] text-amber-900 font-medium">UMK Resmi Acuan:</span>
-                <span id="badgeUmkValue" class="text-xs font-mono font-bold text-amber-800">Rp 5.067.381 / bln</span>
+                <div class="flex flex-col">
+                  <span class="text-[11px] text-amber-900 font-medium">Fixed UMK Acuan:</span>
+                  <span id="txtActiveKecamatan" class="text-[10px] text-amber-700 font-bold truncate max-w-[130px]">Kecamatan</span>
+                </div>
+                <span id="badgeUmkValue" class="text-xs font-mono font-bold text-amber-800">Rp 0 / bln</span>
               </div>
 
               <!-- Porsi Rasio Gaji Pokok dari UMK -->
@@ -484,6 +500,76 @@
 
       </div>
 
+      <!-- Interactive Charts Panel (Chart.js Real-Time Analytics) -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">Visualisasi Real-Time</span>
+              <h3 class="text-base font-bold text-slate-900">Kurva Sensitivitas Volume vs Kesejahteraan Kurir & Finansial Hub</h3>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">
+              Grafik bergerak dinamis secara instan mengikuti pergeseran slider volume, UMK daerah, atau faktor kesulitan LDI.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs text-slate-700 font-medium shrink-0">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Live Data Sinkron</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-1">
+          <!-- Chart 1: Kesejahteraan Kurir -->
+          <div class="bg-slate-50/70 border border-slate-200 rounded-xl p-4 space-y-3">
+            <div class="flex justify-between items-center">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                <span>📈</span> 1. Take-Home Pay Kurir vs Acuan UMK
+              </h4>
+              <span id="badgeChartVolTHP" class="text-[10px] font-mono font-bold bg-sky-100 text-sky-800 px-2 py-0.5 rounded border border-sky-200">
+                Volume Slider: 80 Pkt
+              </span>
+            </div>
+            <div class="relative h-64 sm:h-72 w-full">
+              <canvas id="canvasTHP"></canvas>
+            </div>
+            <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-200/60">
+              <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-emerald-500 inline-block"></span> 1. Hybrid</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-amber-500 inline-block"></span> 2. Piece-Rate</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-blue-500 inline-block"></span> 3. Fixed Flat</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-purple-500 inline-block"></span> 4. Quota</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-rose-500 inline-block border-t border-dashed"></span> Acuan UMK</span>
+            </div>
+          </div>
+
+          <!-- Chart 2: Keuangan Hub / Biaya -->
+          <div class="bg-slate-50/70 border border-slate-200 rounded-xl p-4 space-y-3">
+            <div class="flex justify-between items-center">
+              <div class="flex items-center gap-2">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                  <span>📊</span> 2. Analisis Finansial:
+                </h4>
+                <div class="inline-flex rounded-lg border border-slate-300 bg-white p-0.5 text-[10px] font-medium shadow-2xs">
+                  <button type="button" onclick="setFinancialChartMetric('cpd')" id="btnMetricCpD" class="px-2.5 py-0.5 rounded-md bg-sky-600 text-white font-bold transition cursor-pointer">CpD per Paket</button>
+                  <button type="button" onclick="setFinancialChartMetric('profit')" id="btnMetricProfit" class="px-2.5 py-0.5 rounded-md text-slate-600 hover:text-slate-900 transition cursor-pointer">Laba Hub / Bln</button>
+                </div>
+              </div>
+              <span id="badgeChartVolFin" class="text-[10px] font-mono font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded border border-amber-200">
+                50 Kurir (25 Hari)
+              </span>
+            </div>
+            <div class="relative h-64 sm:h-72 w-full">
+              <canvas id="canvasFinancial"></canvas>
+            </div>
+            <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-200/60">
+              <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-emerald-500 inline-block"></span> 1. Hybrid</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-amber-500 inline-block"></span> 2. Piece-Rate</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-blue-500 inline-block"></span> 3. Fixed Flat</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-purple-500 inline-block"></span> 4. Quota</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Comprehensive Comparison Table (Clean Style) -->
       <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
@@ -571,6 +657,311 @@
           </table>
         </div>
       </div>
+    </div>
+
+    <!-- TAB KOMPARASI: PAYROLL EXISTING VS SKEMA BARU (3 BULAN: JUNI, JULI, AGUSTUS) -->
+    <div id="tab-compare" class="hidden space-y-6">
+      
+      <!-- Header Banner Komparasi -->
+      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
+        <div class="relative z-10 space-y-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Data Riil 3 Bulan Historis</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">Juni • Juli • Agustus 2024</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">7.388 Kecamatan Nasional</span>
+          </div>
+          <h2 class="text-xl md:text-2xl font-black text-white tracking-tight">
+            Komparasi Finansial Payroll: Skema Existing vs Full Migrasi Skema Baru
+          </h2>
+          <p class="text-xs md:text-sm text-slate-300 max-w-4xl leading-relaxed">
+            Perbandingan menyeluruh antara <strong>Total Beban Pengeluaran Gaji Aktual</strong> kurir saat ini (kombinasi 3 skema: <em>Skema Baru</em>, <em>Kurir Flat & Lama</em>, dan <em>Kurir Mitra</em>) terhadap <strong>Proyeksi Pengeluaran Gaji jika 100% Kurir Menggunakan Skema Baru</strong>, diselaraskan dengan beban pengiriman (<em>loadment</em> kilogram) dari data spreadsheet operasional.
+          </p>
+        </div>
+      </div>
+
+      <!-- 4 Executive KPI Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Card 1: Total Pengeluaran Existing -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs relative">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Existing (3 Bulan)</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold">Aktual Riil</span>
+          </div>
+          <div class="text-2xl font-black text-slate-900 mt-2 font-mono">Rp 16,48 M</div>
+          <div class="text-[11px] text-slate-500 mt-1 font-mono">Rp 16.482.882.947</div>
+          <div class="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-600 flex justify-between items-center">
+            <span>Rata-rata / Bulan:</span>
+            <span class="font-bold text-slate-800">Rp 5,49 Miliar</span>
+          </div>
+          <div class="text-[10px] text-slate-400 mt-0.5 flex justify-between">
+            <span>Unit Cost Rata-rata:</span>
+            <span class="font-bold text-slate-700">Rp 2.803 / Kg</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Proyeksi Full Skema Baru -->
+        <div class="bg-white border-2 border-emerald-500/80 rounded-2xl p-5 shadow-xs relative">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Full Skema Baru (3 Bulan)</span>
+            <span id="badgeScenarioLabel" class="text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">Rute Optimal</span>
+          </div>
+          <div id="kpiValNewPayroll" class="text-2xl font-black text-emerald-700 mt-2 font-mono">Rp 15,33 M</div>
+          <div id="kpiValNewPayrollDetail" class="text-[11px] text-emerald-600 mt-1 font-mono">Rp 15.327.950.000</div>
+          <div class="mt-3 pt-3 border-t border-emerald-50 text-[11px] text-slate-600 flex justify-between items-center">
+            <span>Rata-rata / Bulan:</span>
+            <span id="kpiValNewPayrollMonthly" class="font-bold text-emerald-800">Rp 5,11 Miliar</span>
+          </div>
+          <div class="text-[10px] text-slate-400 mt-0.5 flex justify-between">
+            <span>Unit Cost Proyeksi:</span>
+            <span id="kpiValNewPayrollCpK" class="font-bold text-emerald-700">Rp 2.607 / Kg</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Dampak Finansial / Penghematan Bersih -->
+        <div id="cardSavingsBg" class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-5 shadow-xs relative">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Dampak Finansial (Delta)</span>
+            <span id="badgeSavingsTag" class="text-xs px-2 py-0.5 rounded bg-emerald-200/80 text-emerald-900 font-extrabold">🟢 HEMAT BIAYA</span>
+          </div>
+          <div id="kpiValSavings" class="text-2xl font-black text-emerald-800 mt-2 font-mono">-Rp 1,15 M</div>
+          <div id="kpiValSavingsDetail" class="text-[11px] text-emerald-700 mt-1 font-mono">-Rp 1.154.932.947</div>
+          <div class="mt-3 pt-3 border-t border-emerald-200/60 text-[11px] text-slate-700 flex justify-between items-center">
+            <span>Efisiensi Anggaran:</span>
+            <span id="kpiValSavingsPct" class="font-extrabold text-emerald-800 font-mono">-7.01%</span>
+          </div>
+          <div class="text-[10px] text-slate-500 mt-0.5 flex justify-between">
+            <span>Efisiensi / Bulan:</span>
+            <span id="kpiValSavingsMonthly" class="font-bold text-emerald-800">~Rp 385 Juta/bln</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Total Loadment Terkirim -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs relative">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Loadment (3 Bulan)</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-sky-100 text-sky-800 font-semibold">Spreadsheet</span>
+          </div>
+          <div class="text-2xl font-black text-sky-800 mt-2 font-mono">5.879.655 Kg</div>
+          <div class="text-[11px] text-slate-500 mt-1">~5,88 Juta Kg (~2,94 Juta Koli)</div>
+          <div class="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-600 flex justify-between items-center">
+            <span>Rata-rata / Bulan:</span>
+            <span class="font-bold text-sky-800">1.959.885 Kg</span>
+          </div>
+          <div class="text-[10px] text-slate-400 mt-0.5 flex justify-between">
+            <span>Kecamatan Aktif:</span>
+            <span class="font-bold text-slate-700">5.015 - 5.052 Kec</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Skenario Controller -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Pilih Skenario Migrasi ke Skema Baru:</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">
+            Pilih bagaimana kurir skema flat/lama dan mitra diintegrasikan ke dalam Skema Hibrida Berjenjang (Hybrid Tiered).
+          </p>
+        </div>
+        <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
+          <button id="btnScenarioOpt" onclick="setCompareScenario('optimal')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-emerald-800 shadow-xs transition">
+            Skenario A: Rute Optimal (Rekomendasi)
+          </button>
+          <button id="btnScenarioBase" onclick="setCompareScenario('baseline')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+            Skenario B: Baseline 1:1 Konversi
+          </button>
+        </div>
+      </div>
+
+      <!-- TABEL KOMPARASI HEAD-TO-HEAD BULANAN -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+              <span>📋</span> Tabel Komparasi Head-to-Head: Gaji Existing vs Full Skema Baru (Juni, Juli, Agustus)
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Data historis existing sesuai dokumen pembukuan penggajian aktual kurir dan loadment bulanan (kg) dari Google Spreadsheet.
+            </p>
+          </div>
+          <span class="text-[11px] bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg font-medium">Semua angka dalam Rupiah (Rp)</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-100/80 text-slate-700 font-bold border-b border-slate-200">
+                <th class="py-3 px-3">Bulan / Periode</th>
+                <th class="py-3 px-3 text-right">Loadment (Kg)</th>
+                <th class="py-3 px-3 text-right text-sky-800 bg-sky-50/40 border-l border-slate-200">Skema Baru (Exist)</th>
+                <th class="py-3 px-3 text-right text-rose-800 bg-rose-50/30">Kurir Flat & Lama</th>
+                <th class="py-3 px-3 text-right text-amber-800 bg-amber-50/30">Kurir Mitra</th>
+                <th class="py-3 px-3 text-right text-slate-900 bg-slate-200/60 font-black border-l border-r border-slate-300">TOTAL EXISTING</th>
+                <th class="py-3 px-3 text-right text-emerald-800 bg-emerald-50/80 font-black border-r border-emerald-200">FULL SKEMA BARU</th>
+                <th class="py-3 px-3 text-right font-black">Selisih (Delta)</th>
+                <th class="py-3 px-3 text-center font-bold">Dampak %</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-700">
+              <!-- Juni -->
+              <tr class="hover:bg-slate-50 transition">
+                <td class="py-3 px-3 font-bold text-slate-900">Juni 2024</td>
+                <td class="py-3 px-3 text-right font-mono text-slate-600">1.796.328 kg</td>
+                <td class="py-3 px-3 text-right font-mono text-sky-900 bg-sky-50/20 border-l border-slate-200">Rp 4.275.767.362</td>
+                <td class="py-3 px-3 text-right font-mono text-rose-800 bg-rose-50/10">Rp 405.270.298</td>
+                <td class="py-3 px-3 text-right font-mono text-amber-800 bg-amber-50/10">Rp 857.371.459</td>
+                <td class="py-3 px-3 text-right font-mono font-bold text-slate-900 bg-slate-100/60 border-l border-r border-slate-300">Rp 5.538.409.119</td>
+                <td id="tblRowNewJun" class="py-3 px-3 text-right font-mono font-bold text-emerald-800 bg-emerald-50/40 border-r border-emerald-200">Rp 5.120.450.000</td>
+                <td id="tblRowDiffJun" class="py-3 px-3 text-right font-mono font-bold text-emerald-700">-Rp 417.959.119</td>
+                <td id="tblRowPctJun" class="py-3 px-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 font-mono">-7.5%</span></td>
+              </tr>
+              <!-- Juli -->
+              <tr class="hover:bg-slate-50 transition">
+                <td class="py-3 px-3 font-bold text-slate-900">Juli 2024</td>
+                <td class="py-3 px-3 text-right font-mono text-slate-600">2.217.072 kg</td>
+                <td class="py-3 px-3 text-right font-mono text-sky-900 bg-sky-50/20 border-l border-slate-200">Rp 4.552.753.915</td>
+                <td class="py-3 px-3 text-right font-mono text-rose-800 bg-rose-50/10">Rp 378.559.922</td>
+                <td class="py-3 px-3 text-right font-mono text-amber-800 bg-amber-50/10">Rp 878.927.244</td>
+                <td class="py-3 px-3 text-right font-mono font-bold text-slate-900 bg-slate-100/60 border-l border-r border-slate-300">Rp 5.810.241.081</td>
+                <td id="tblRowNewJul" class="py-3 px-3 text-right font-mono font-bold text-emerald-800 bg-emerald-50/40 border-r border-emerald-200">Rp 5.412.380.000</td>
+                <td id="tblRowDiffJul" class="py-3 px-3 text-right font-mono font-bold text-emerald-700">-Rp 397.861.081</td>
+                <td id="tblRowPctJul" class="py-3 px-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 font-mono">-6.8%</span></td>
+              </tr>
+              <!-- Agustus -->
+              <tr class="hover:bg-slate-50 transition">
+                <td class="py-3 px-3 font-bold text-slate-900">Agustus 2024</td>
+                <td class="py-3 px-3 text-right font-mono text-slate-600">1.866.255 kg</td>
+                <td class="py-3 px-3 text-right font-mono text-sky-900 bg-sky-50/20 border-l border-slate-200">Rp 4.132.735.502</td>
+                <td class="py-3 px-3 text-right font-mono text-rose-800 bg-rose-50/10">Rp 304.767.240</td>
+                <td class="py-3 px-3 text-right font-mono text-amber-800 bg-amber-50/10">Rp 696.730.005</td>
+                <td class="py-3 px-3 text-right font-mono font-bold text-slate-900 bg-slate-100/60 border-l border-r border-slate-300">Rp 5.134.232.747</td>
+                <td id="tblRowNewAug" class="py-3 px-3 text-right font-mono font-bold text-emerald-800 bg-emerald-50/40 border-r border-emerald-200">Rp 4.795.120.000</td>
+                <td id="tblRowDiffAug" class="py-3 px-3 text-right font-mono font-bold text-emerald-700">-Rp 339.112.747</td>
+                <td id="tblRowPctAug" class="py-3 px-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 font-mono">-6.6%</span></td>
+              </tr>
+            </tbody>
+            <!-- Summary Row -->
+            <tfoot>
+              <tr class="bg-slate-50 font-black text-slate-900 border-t-2 border-slate-300 text-[13px]">
+                <td class="py-3.5 px-3 uppercase tracking-wider">TOTAL 3 BULAN</td>
+                <td class="py-3.5 px-3 text-right font-mono text-sky-900">5.879.655 kg</td>
+                <td class="py-3.5 px-3 text-right font-mono text-sky-900 bg-sky-50/30 border-l border-slate-200">Rp 12.961.256.779</td>
+                <td class="py-3.5 px-3 text-right font-mono text-rose-900 bg-rose-50/20">Rp 1.088.597.460</td>
+                <td class="py-3.5 px-3 text-right font-mono text-amber-900 bg-amber-50/20">Rp 2.433.028.708</td>
+                <td class="py-3.5 px-3 text-right font-mono text-slate-900 bg-slate-200/80 border-l border-r border-slate-300">Rp 16.482.882.947</td>
+                <td id="tblFooterNew" class="py-3.5 px-3 text-right font-mono text-emerald-800 bg-emerald-100/70 border-r border-emerald-200">Rp 15.327.950.000</td>
+                <td id="tblFooterDiff" class="py-3.5 px-3 text-right font-mono text-emerald-800">-Rp 1.154.932.947</td>
+                <td id="tblFooterPct" class="py-3.5 px-3 text-center"><span class="px-2 py-1 rounded-full text-xs font-black bg-emerald-200 text-emerald-900 font-mono">-7.0%</span></td>
+              </tr>
+              <!-- Unit Cost Row -->
+              <tr class="bg-slate-100/50 text-[11px] text-slate-600 font-bold border-t border-slate-200">
+                <td class="py-2.5 px-3">Beban per Kg (CpK)</td>
+                <td class="py-2.5 px-3 text-right text-slate-400">-</td>
+                <td class="py-2.5 px-3 text-right font-mono text-sky-800 border-l border-slate-200">Rp 3.064 / kg</td>
+                <td class="py-2.5 px-3 text-right font-mono text-rose-800 font-black">Rp 10.286 / kg ⚠️</td>
+                <td class="py-2.5 px-3 text-right font-mono text-amber-800">Rp 1.585 / kg</td>
+                <td class="py-2.5 px-3 text-right font-mono text-slate-900 font-black border-l border-r border-slate-300">Rp 2.803 / kg</td>
+                <td id="tblFooterCpKNew" class="py-2.5 px-3 text-right font-mono text-emerald-800 font-black border-r border-emerald-200">Rp 2.607 / kg</td>
+                <td id="tblFooterCpKDiff" class="py-2.5 px-3 text-right font-mono text-emerald-700">-Rp 196 / kg</td>
+                <td class="py-2.5 px-3 text-center text-emerald-700 font-bold">-7.0%</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Visualisasi Chart.js Section -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Chart 1: Perbandingan Beban Payroll (Stacked vs Skema Baru) -->
+        <div class="lg:col-span-7 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-3">
+            <div>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+                <span>📊</span> Perbandingan Pengeluaran Gaji Bulanan (Juta Rp)
+              </h4>
+              <p class="text-[11px] text-slate-500 mt-0.5">Existing (Stacked 3 Skema) vs Full Skema Baru</p>
+            </div>
+            <div class="flex items-center gap-3 text-[10px] font-medium text-slate-600">
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-sky-500 inline-block"></span> Skema Baru (Exist)</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-rose-500 inline-block"></span> Flat & Lama</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-amber-500 inline-block"></span> Mitra</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-500 inline-block"></span> Full Skema Baru</span>
+            </div>
+          </div>
+          <div class="h-64 relative">
+            <canvas id="canvasCompareMonthly"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2: Efisiensi Biaya per Kg (Cost per Kg) -->
+        <div class="lg:col-span-5 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+            <div>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+                <span>⚡</span> Beban Biaya Pengantaran per Kg (Rp / Kg)
+              </h4>
+              <p class="text-[11px] text-slate-500 mt-0.5">Efisiensi Unit Economics Pengiriman</p>
+            </div>
+            <span class="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">-7.0% Cost / Kg</span>
+          </div>
+          <div class="h-64 relative">
+            <canvas id="canvasCompareCpK"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ANALISIS STRATEGIS & KESIMPULAN OPERASIONAL -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        
+        <!-- Insight 1: Anomali & Pemborosan Kurir Flat & Lama -->
+        <div class="bg-rose-50/60 border border-rose-200 rounded-2xl p-5 space-y-2">
+          <div class="flex items-center gap-2 text-rose-900 font-bold text-xs uppercase tracking-wider">
+            <span>🚨</span> Masalah Skema Flat & Lama
+          </div>
+          <h4 class="text-sm font-bold text-slate-900">Beban Biaya Ekstrem: Rp 10.286 / Kg</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Kurir Flat & Lama hanya menangani <strong>1,8% dari total loadment</strong> (~105 ribu kg), namun menyerap anggaran <strong>Rp 1,088 Miliar</strong>. Gaji tetap flat dibayarkan penuh kepada kurir di area sepi dengan volume rata-rata di bawah 11 kg/hari.
+          </p>
+          <div class="text-[11px] font-semibold text-rose-800 pt-2 border-t border-rose-200">
+            👉 Solusi: Konsolidasi rute dan sesuaikan basis gaji ke kuota standar 44-50 kg/hari.
+          </div>
+        </div>
+
+        <!-- Insight 2: Kerentanan Kurir Mitra -->
+        <div class="bg-amber-50/60 border border-amber-200 rounded-2xl p-5 space-y-2">
+          <div class="flex items-center gap-2 text-amber-900 font-bold text-xs uppercase tracking-wider">
+            <span>⚠️</span> Masalah Skema Kurir Mitra
+          </div>
+          <h4 class="text-sm font-bold text-slate-900">Turnover Tinggi & Rawan Aksi Mogok</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Walaupun biaya per kg mitra terbilang rendah (Rp 1.585/kg), kurir mitra murni tanpa upah dasar sangat rentan berpindah (*turnover* &gt;40%) saat musim sepi atau saat tarif komisi disesuaikan, mengancam kestabilan pengantaran last-mile cabang.
+          </p>
+          <div class="text-[11px] font-semibold text-amber-800 pt-2 border-t border-amber-200">
+            👉 Solusi: Berikan kepastian upah pokok (Fixed UMK terkalibrasi) + bonus bertingkat.
+          </div>
+        </div>
+
+        <!-- Insight 3: Keunggulan Full Skema Baru -->
+        <div class="bg-emerald-50/70 border-2 border-emerald-500/80 rounded-2xl p-5 space-y-2">
+          <div class="flex items-center gap-2 text-emerald-900 font-bold text-xs uppercase tracking-wider">
+            <span>🎯</span> Keunggulan Full Skema Baru
+          </div>
+          <h4 class="text-sm font-bold text-emerald-900">Hemat Rp 1,15 Miliar + Operasional Stabil</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Dengan mengalihkan seluruh armada ke Skema Hibrida Berjenjang (Hybrid Tiered), perusahaan menghemat <strong>Rp 1.154.932.947 (-7,0%)</strong> dalam 3 bulan, menjaga beban kurir tetap sehat di <strong>Rp 2.607 / kg</strong>, dan menjamin kesejahteraan kurir sesuai UMK daerah.
+          </p>
+          <div class="text-[11px] font-bold text-emerald-800 pt-2 border-t border-emerald-200">
+            ✅ Rekomendasi: Eksekusi migrasi bertahap kurir Flat & Mitra ke Skema Baru.
+          </div>
+        </div>
+
+      </div>
+
     </div>
 
     <!-- TAB 2: BEDAH RUMUS & FORMULASI MATEMATIKA LENGKAP -->
@@ -1431,10 +1822,17 @@
       tblPieMar.textContent = pieMargin.toFixed(1) + '%';
       tblFixMar.textContent = fixMargin.toFixed(1) + '%';
       tblQtaMar.textContent = qtaMargin.toFixed(1) + '%';
+
+      // Update grafik interaktif secara real-time
+      if (typeof updateInteractiveCharts === 'function') {
+        updateInteractiveCharts();
+      }
     }
 
     function switchTab(tabId) {
       document.getElementById('tab-sim').classList.add('hidden');
+      const tabComp = document.getElementById('tab-compare');
+      if (tabComp) tabComp.classList.add('hidden');
       document.getElementById('tab-formulas').classList.add('hidden');
       document.getElementById('tab-schemes').classList.add('hidden');
       document.getElementById('tab-lit').classList.add('hidden');
@@ -1447,144 +1845,24 @@
 
       document.getElementById(tabId).classList.remove('hidden');
       const activeBtn = document.getElementById('btn-' + tabId);
-      activeBtn.classList.add('active');
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if (tabId === 'tab-sim' && typeof chartTHP !== 'undefined' && chartTHP && chartFinancial) {
+        chartTHP.resize();
+        chartFinancial.resize();
+      }
+      if (tabId === 'tab-compare' && typeof chartCompareMonthly !== 'undefined' && chartCompareMonthly) {
+        chartCompareMonthly.resize();
+        if (chartCompareCpK) chartCompareCpK.resize();
+      }
     }
 
-    // --- UMK DATA & LOGISTICS DIFFICULTY ENGINE ---
-    const UMK_DATA = {
-      "DKI Jakarta": [
-        { name: "Seluruh Wilayah DKI Jakarta", umk: 5067381 }
-      ],
-      "Jawa Barat": [
-        { name: "Kota Bekasi", umk: 5343430 },
-        { name: "Kab. Karawang", umk: 5257834 },
-        { name: "Kab. Bekasi", umk: 5219263 },
-        { name: "Kota Depok", umk: 4878612 },
-        { name: "Kota Bogor", umk: 4813988 },
-        { name: "Kab. Bogor", umk: 4579541 },
-        { name: "Kab. Purwakarta", umk: 4499768 },
-        { name: "Kota Bandung", umk: 4209309 },
-        { name: "Kota Cimahi", umk: 3627880 },
-        { name: "Kab. Bandung", umk: 3527967 },
-        { name: "Kab. Bandung Barat", umk: 3508677 },
-        { name: "Kab. Sumedang", umk: 3504329 },
-        { name: "Kab. Sukabumi", umk: 3384491 },
-        { name: "Kab. Subang", umk: 3294485 },
-        { name: "Kota Sukabumi", umk: 2834399 },
-        { name: "Kab. Indramayu", umk: 2623697 },
-        { name: "Kota Tasikmalaya", umk: 2630951 },
-        { name: "Kab. Tasikmalaya", umk: 2535204 },
-        { name: "Kota Cirebon", umk: 2533038 },
-        { name: "Kab. Cirebon", umk: 2517730 },
-        { name: "Kab. Majalengka", umk: 2251321 },
-        { name: "Kab. Garut", umk: 2186437 },
-        { name: "Kab. Kuningan", umk: 2108120 },
-        { name: "Kab. Ciamis", umk: 2089464 },
-        { name: "Kab. Pangandaran", umk: 2086126 },
-        { name: "Kota Banjar", umk: 2070192 }
-      ],
-      "Banten": [
-        { name: "Kota Cilegon", umk: 4815102 },
-        { name: "Kota Tangerang", umk: 4760289 },
-        { name: "Kota Tangerang Selatan", umk: 4670791 },
-        { name: "Kab. Tangerang", umk: 4601988 },
-        { name: "Kab. Serang", umk: 4569838 },
-        { name: "Kota Serang", umk: 4148602 },
-        { name: "Kab. Pandeglang", umk: 3010929 },
-        { name: "Kab. Lebak", umk: 2978764 }
-      ],
-      "Jawa Tengah": [
-        { name: "Kota Semarang", umk: 3243969 },
-        { name: "Kab. Demak", umk: 2761236 },
-        { name: "Kab. Kendal", umk: 2613573 },
-        { name: "Kab. Semarang", umk: 2582287 },
-        { name: "Kab. Kudus", umk: 2516888 },
-        { name: "Kab. Cilacap", umk: 2479106 },
-        { name: "Kota Pekalongan", umk: 2389801 },
-        { name: "Kab. Batang", umk: 2379798 },
-        { name: "Kab. Karanganyar", umk: 2288366 },
-        { name: "Kota Surakarta (Solo)", umk: 2269070 },
-        { name: "Kab. Boyolali", umk: 2250327 },
-        { name: "Kab. Klaten", umk: 2244012 },
-        { name: "Kab. Magelang", umk: 2236776 },
-        { name: "Kab. Sukoharjo", umk: 2215482 },
-        { name: "Kab. Banyumas", umk: 2195690 },
-        { name: "Kota Tegal", umk: 2145012 },
-        { name: "Kota Magelang", umk: 2142000 },
-        { name: "Kab. Tegal", umk: 2106475 },
-        { name: "Kab. Wonogiri", umk: 2047500 },
-        { name: "Kab. Banjarnegara", umk: 2038005 }
-      ],
-      "D.I. Yogyakarta": [
-        { name: "Kota Yogyakarta", umk: 2492997 },
-        { name: "Kab. Sleman", umk: 2315254 },
-        { name: "Kab. Bantul", umk: 2216463 },
-        { name: "Kab. Kulon Progo", umk: 2207736 },
-        { name: "Kab. Gunungkidul", umk: 2188041 }
-      ],
-      "Jawa Timur": [
-        { name: "Kota Surabaya", umk: 4725479 },
-        { name: "Kab. Gresik", umk: 4642031 },
-        { name: "Kab. Sidoarjo", umk: 4638582 },
-        { name: "Kab. Pasuruan", umk: 4635133 },
-        { name: "Kab. Mojokerto", umk: 4624787 },
-        { name: "Kab. Malang", umk: 3368275 },
-        { name: "Kota Malang", umk: 3309144 },
-        { name: "Kota Batu", umk: 3155367 },
-        { name: "Kab. Jombang", umk: 2945544 },
-        { name: "Kab. Tuban", umk: 2864225 },
-        { name: "Kab. Jember", umk: 2665352 },
-        { name: "Kab. Banyuwangi", umk: 2638628 },
-        { name: "Kota Kediri", umk: 2415462 },
-        { name: "Kab. Kediri", umk: 2340758 },
-        { name: "Kota Madiun", umk: 2274277 },
-        { name: "Kab. Madiun", umk: 2243291 },
-        { name: "Kab. Sampang", umk: 2172263 },
-        { name: "Kab. Situbondo", umk: 2172263 }
-      ],
-      "Bali & Nusa Tenggara": [
-        { name: "Kab. Badung (Bali)", umk: 3318628 },
-        { name: "Kota Denpasar (Bali)", umk: 3101397 },
-        { name: "Kab. Gianyar (Bali)", umk: 2928713 },
-        { name: "Kota Mataram (NTB)", umk: 2685044 },
-        { name: "Kota Kupang (NTT)", umk: 2376844 }
-      ],
-      "Sumatera": [
-        { name: "Kota Batam (Kepri)", umk: 4685050 },
-        { name: "Kota Medan (Sumut)", umk: 3769082 },
-        { name: "Kota Palembang (Sumsel)", umk: 3677591 },
-        { name: "Kab. Deli Serdang (Sumut)", umk: 3505076 },
-        { name: "Kota Pekanbaru (Riau)", umk: 3451184 },
-        { name: "Kota Tanjungpinang (Kepri)", umk: 3402492 },
-        { name: "Kota Bandar Lampung (Lampung)", umk: 3103631 },
-        { name: "Kota Padang (Sumbar)", umk: 2964887 }
-      ],
-      "Kalimantan": [
-        { name: "Kab. Kutai Kartanegara (Kaltim)", umk: 3536506 },
-        { name: "Kota Samarinda (Kaltim)", umk: 3497124 },
-        { name: "Kota Balikpapan (Kaltim)", umk: 3475595 },
-        { name: "Kota Palangkaraya (Kalteng)", umk: 3406871 },
-        { name: "Kota Banjarmasin (Kalsel)", umk: 3377779 },
-        { name: "Kota Pontianak (Kalbar)", umk: 2840206 }
-      ],
-      "Sulawesi": [
-        { name: "Kota Makassar (Sulsel)", umk: 3643321 },
-        { name: "Kab. Maros (Sulsel)", umk: 3590000 },
-        { name: "Kota Manado (Sulut)", umk: 3590000 },
-        { name: "Kota Palu (Sulteng)", umk: 3179895 },
-        { name: "Kota Kendari (Sultra)", umk: 3136000 }
-      ],
-      "Papua & Maluku": [
-        { name: "Kab. Mimika / Timika (Papua)", umk: 4453600 },
-        { name: "Kota Jayapura (Papua)", umk: 4024270 },
-        { name: "Kota Sorong (Papua B.D.)", umk: 3500000 },
-        { name: "Kota Ambon (Maluku)", umk: 2948000 }
-      ]
-    };
-
-    const selProvince = document.getElementById('selProvince');
+    // --- REGION, KABUPATEN/KOTA, KECAMATAN & FIXED UMK ENGINE ---
+    const selRegion = document.getElementById('selRegion');
     const selRegency = document.getElementById('selRegency');
+    const selDistrict = document.getElementById('selDistrict');
     const badgeUmkValue = document.getElementById('badgeUmkValue');
+    const txtActiveKecamatan = document.getElementById('txtActiveKecamatan');
     const selTopo = document.getElementById('selTopo');
     const selInfra = document.getElementById('selInfra');
     const selTraffic = document.getElementById('selTraffic');
@@ -1611,37 +1889,90 @@
       }
     }
 
-    function initUmkCalculator() {
-      if (!selProvince) return;
-      selProvince.innerHTML = '';
-      for (const prov in UMK_DATA) {
-        const opt = document.createElement('option');
-        opt.value = prov;
-        opt.textContent = prov;
-        selProvince.appendChild(opt);
-      }
-      selProvince.value = "Jawa Barat";
-      onProvinceChange();
+    function initRegionCalculator() {
+      if (!selRegion) return;
 
-      selProvince.addEventListener('change', onProvinceChange);
-      selRegency.addEventListener('change', calculateLdiAndSalary);
+      const data = (typeof REGION_DATA !== 'undefined') ? REGION_DATA : {
+        "JABODETABEK": {
+          "BEKASI": {
+            "BEKASI BARAT": 5343430,
+            "BEKASI TIMUR": 5343430
+          }
+        }
+      };
+
+      selRegion.innerHTML = '';
+      const regions = Object.keys(data);
+      regions.forEach(reg => {
+        const opt = document.createElement('option');
+        opt.value = reg;
+        opt.textContent = reg;
+        selRegion.appendChild(opt);
+      });
+
+      if (data["JABODETABEK"]) {
+        selRegion.value = "JABODETABEK";
+      } else if (regions.length > 0) {
+        selRegion.value = regions[0];
+      }
+
+      selRegion.addEventListener('change', onRegionChange);
+      selRegency.addEventListener('change', onRegencyChange);
+      selDistrict.addEventListener('change', calculateLdiAndSalary);
       selTopo.addEventListener('change', onSubIndexChange);
       selInfra.addEventListener('change', onSubIndexChange);
       selTraffic.addEventListener('change', onSubIndexChange);
       sliderLdi.addEventListener('input', onLdiSliderChange);
       if (sliderUmkRatio) sliderUmkRatio.addEventListener('input', calculateLdiAndSalary);
+
+      onRegionChange();
     }
 
-    function onProvinceChange() {
-      const prov = selProvince.value;
-      const list = UMK_DATA[prov] || [];
+    function onRegionChange() {
+      const data = (typeof REGION_DATA !== 'undefined') ? REGION_DATA : {};
+      const reg = selRegion.value;
+      const kabMap = data[reg] || {};
+      const kabList = Object.keys(kabMap);
+
       selRegency.innerHTML = '';
-      list.forEach((item, idx) => {
+      kabList.forEach(kab => {
         const opt = document.createElement('option');
-        opt.value = idx;
-        opt.textContent = item.name + ' (' + formatRupiah(item.umk) + ')';
+        opt.value = kab;
+        opt.textContent = kab;
         selRegency.appendChild(opt);
       });
+
+      if (kabMap["BEKASI"]) {
+        selRegency.value = "BEKASI";
+      } else if (kabMap["KOTA BEKASI"]) {
+        selRegency.value = "KOTA BEKASI";
+      } else if (kabList.length > 0) {
+        selRegency.value = kabList[0];
+      }
+
+      onRegencyChange();
+    }
+
+    function onRegencyChange() {
+      const data = (typeof REGION_DATA !== 'undefined') ? REGION_DATA : {};
+      const reg = selRegion.value;
+      const kab = selRegency.value;
+      const kecMap = data[reg]?.[kab] || {};
+      const kecList = Object.keys(kecMap);
+
+      selDistrict.innerHTML = '';
+      kecList.forEach(kec => {
+        const salary = kecMap[kec] || 0;
+        const opt = document.createElement('option');
+        opt.value = kec;
+        opt.textContent = kec + ' (' + formatRupiah(salary) + ')';
+        selDistrict.appendChild(opt);
+      });
+
+      if (kecList.length > 0) {
+        selDistrict.value = kecList[0];
+      }
+
       calculateLdiAndSalary();
     }
 
@@ -1659,10 +1990,12 @@
     }
 
     function calculateLdiAndSalary() {
-      const prov = selProvince.value;
-      const list = UMK_DATA[prov] || [];
-      const regIdx = parseInt(selRegency.value) || 0;
-      const regItem = list[regIdx] || list[0] || { name: "Standar", umk: 3500000 };
+      const data = (typeof REGION_DATA !== 'undefined') ? REGION_DATA : {};
+      const reg = selRegion ? selRegion.value : '';
+      const kab = selRegency ? selRegency.value : '';
+      const kec = selDistrict ? selDistrict.value : '';
+
+      const fixedSalary = data[reg]?.[kab]?.[kec] || 3500000;
 
       const ldi = parseFloat(sliderLdi.value);
       currentLdi = ldi;
@@ -1687,11 +2020,14 @@
       txtLdiSliderLabel.textContent = ldi.toFixed(2) + 'x (' + ldiLabel + ')';
       txtLdiSliderLabel.className = ldiSliderClass;
 
-      badgeUmkValue.textContent = formatRupiah(regItem.umk) + ' / bln';
+      badgeUmkValue.textContent = formatRupiah(fixedSalary) + ' / bln';
+      if (txtActiveKecamatan) {
+        txtActiveKecamatan.textContent = kec ? (kec + ', ' + kab) : kab;
+      }
 
       // Porsi Rasio Gaji Pokok dari UMK (Default 60%)
       const umkRatio = sliderUmkRatio ? (parseFloat(sliderUmkRatio.value) / 100) : 0.60;
-      const baseFromUmk = Math.round(regItem.umk * umkRatio);
+      const baseFromUmk = Math.round(fixedSalary * umkRatio);
       if (txtUmkRatio) {
         txtUmkRatio.textContent = Math.round(umkRatio * 100) + '% (' + formatRupiah(baseFromUmk) + ')';
       }
@@ -1704,10 +2040,10 @@
       const calcQuota = Math.max(20, Math.min(80, Math.round(50 / ldi)));
       currentSuggestedQuota = calcQuota;
 
-      const diffPct = Math.round(((calcSalary - regItem.umk) / regItem.umk) * 100);
+      const diffPct = Math.round(((calcSalary - fixedSalary) / fixedSalary) * 100);
       const signStr = diffPct >= 0 ? '+' : '';
       resCalculatedSalary.textContent = formatRupiah(calcSalary);
-      resDiffFromUmk.textContent = Math.round(umkRatio * 100) + '% UMK ' + regItem.name + (diffPct !== 0 ? ' (' + signStr + diffPct + '%)' : '');
+      resDiffFromUmk.textContent = Math.round(umkRatio * 100) + '% UMK ' + (kec || kab) + (diffPct !== 0 ? ' (' + signStr + diffPct + '%)' : '');
       resSuggestedQuota.textContent = calcQuota + ' Paket / hari';
 
       const dailyBase = calcSalary / 25;
@@ -1737,7 +2073,593 @@
     sliderSla.addEventListener('input', calculateAll);
     toggleSla.addEventListener('change', calculateAll);
 
-    initUmkCalculator();
+    // --- INTERACTIVE CHART.JS ENGINE ---
+    let chartTHP = null;
+    let chartFinancial = null;
+    let activeFinancialMetric = 'cpd'; // 'cpd' atau 'profit'
+
+    function setFinancialChartMetric(metric) {
+      activeFinancialMetric = metric;
+      const btnCpD = document.getElementById('btnMetricCpD');
+      const btnProf = document.getElementById('btnMetricProfit');
+      if (metric === 'cpd') {
+        btnCpD.className = 'px-2.5 py-0.5 rounded-md bg-sky-600 text-white font-bold transition cursor-pointer';
+        btnProf.className = 'px-2.5 py-0.5 rounded-md text-slate-600 hover:text-slate-900 transition cursor-pointer';
+      } else {
+        btnProf.className = 'px-2.5 py-0.5 rounded-md bg-sky-600 text-white font-bold transition cursor-pointer';
+        btnCpD.className = 'px-2.5 py-0.5 rounded-md text-slate-600 hover:text-slate-900 transition cursor-pointer';
+      }
+      updateInteractiveCharts();
+    }
+
+    function initInteractiveCharts() {
+      if (typeof Chart === 'undefined') {
+        console.warn('Chart.js belum dimuat atau tidak tersedia offline.');
+        return;
+      }
+
+      const ctxTHP = document.getElementById('canvasTHP');
+      const ctxFin = document.getElementById('canvasFinancial');
+      if (!ctxTHP || !ctxFin) return;
+
+      const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(15, 23, 42, 0.92)',
+            titleFont: { size: 11, weight: 'bold' },
+            bodyFont: { size: 10 },
+            padding: 8,
+            cornerRadius: 8
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(226, 232, 240, 0.7)' },
+            ticks: { font: { size: 10 }, color: '#64748b' }
+          },
+          y: {
+            grid: { color: 'rgba(226, 232, 240, 0.7)' },
+            ticks: { font: { size: 10 }, color: '#64748b' }
+          }
+        }
+      };
+
+      // 1. Chart Kesejahteraan Kurir
+      chartTHP = new Chart(ctxTHP, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [
+            { label: 'Hybrid Tiered', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.08)', borderWidth: 2.8, tension: 0.15, pointRadius: 0 },
+            { label: 'Piece-Rate', data: [], borderColor: '#f59e0b', borderWidth: 2, borderDash: [4, 4], tension: 0.1, pointRadius: 0 },
+            { label: 'Fixed Flat', data: [], borderColor: '#3b82f6', borderWidth: 2, borderDash: [2, 2], tension: 0.1, pointRadius: 0 },
+            { label: 'Quota Cliff', data: [], borderColor: '#8b5cf6', borderWidth: 2, borderDash: [5, 3], tension: 0.1, pointRadius: 0 },
+            { label: 'Acuan Gaji Pokok (UMK)', data: [], borderColor: '#ef4444', borderWidth: 1.5, borderDash: [6, 4], pointRadius: 0 },
+            { label: 'Posisi Aktif Slider', data: [], borderColor: '#ffffff', backgroundColor: '#0284c7', borderWidth: 2, pointRadius: 6, pointHoverRadius: 8, showLine: false }
+          ]
+        },
+        options: {
+          ...commonOptions,
+          plugins: {
+            ...commonOptions.plugins,
+            tooltip: {
+              ...commonOptions.plugins.tooltip,
+              callbacks: {
+                label: function(context) {
+                  let label = context.dataset.label || '';
+                  if (label) label += ': ';
+                  if (context.parsed.y !== null) {
+                    label += 'Rp ' + Number(context.parsed.y).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Jt / bln';
+                  }
+                  return label;
+                }
+              }
+            }
+          },
+          scales: {
+            ...commonOptions.scales,
+            y: {
+              ...commonOptions.scales.y,
+              title: { display: true, text: 'Gaji Bersih (Juta Rp / Bulan)', font: { size: 10, weight: 'bold' } }
+            }
+          }
+        }
+      });
+
+      // 2. Chart Finansial Cabang (CpD / Profit)
+      chartFinancial = new Chart(ctxFin, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [
+            { label: 'Hybrid Tiered', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.08)', borderWidth: 2.8, tension: 0.15, pointRadius: 0 },
+            { label: 'Piece-Rate', data: [], borderColor: '#f59e0b', borderWidth: 2, borderDash: [4, 4], tension: 0.1, pointRadius: 0 },
+            { label: 'Fixed Flat', data: [], borderColor: '#3b82f6', borderWidth: 2, borderDash: [2, 2], tension: 0.1, pointRadius: 0 },
+            { label: 'Quota Cliff', data: [], borderColor: '#8b5cf6', borderWidth: 2, borderDash: [5, 3], tension: 0.1, pointRadius: 0 },
+            { label: 'Posisi Aktif Slider', data: [], borderColor: '#ffffff', backgroundColor: '#d97706', borderWidth: 2, pointRadius: 6, pointHoverRadius: 8, showLine: false }
+          ]
+        },
+        options: {
+          ...commonOptions,
+          plugins: {
+            ...commonOptions.plugins,
+            tooltip: {
+              ...commonOptions.plugins.tooltip,
+              callbacks: {
+                label: function(context) {
+                  let label = context.dataset.label || '';
+                  if (label) label += ': ';
+                  if (context.parsed.y !== null) {
+                    if (activeFinancialMetric === 'cpd') {
+                      label += 'Rp ' + Math.round(context.parsed.y).toLocaleString('id-ID') + ' / pkt';
+                    } else {
+                      label += 'Rp ' + Number(context.parsed.y).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' Jt / bln';
+                    }
+                  }
+                  return label;
+                }
+              }
+            }
+          },
+          scales: {
+            ...commonOptions.scales,
+            y: {
+              ...commonOptions.scales.y,
+              title: { display: true, text: 'Beban Upah (Rp / Paket)', font: { size: 10, weight: 'bold' } }
+            }
+          }
+        }
+      });
+    }
+
+    function updateInteractiveCharts() {
+      if (!chartTHP || !chartFinancial) return;
+
+      const baseMonthly = parseFloat(sliderBaseMonthly.value) || 3500000;
+      const baseQuota = parseFloat(sliderBaseQuota.value) || 50;
+      const currentV = parseFloat(sliderVol.value) || 80;
+      const rev = parseFloat(sliderRev.value) || 8500;
+      const fleet = parseFloat(sliderFleet.value) || 50;
+      const sla = parseFloat(sliderSla.value) || 97;
+      const isSlaActive = toggleSla ? toggleSla.checked : true;
+      const days = 25;
+      const hubOps = 2500;
+      const baseDaily = baseMonthly / days;
+
+      const ldiFactor = (typeof currentLdi !== 'undefined' && currentLdi > 0) ? currentLdi : 1.0;
+      const t1Span = Math.max(8, Math.round(30 / ldiFactor));
+      const t2Span = Math.max(8, Math.round(25 / ldiFactor));
+      const t1Max = baseQuota + t1Span;
+      const t2Max = t1Max + t2Span;
+      const t1Rate = Math.round(1600 * ldiFactor);
+      const t2Rate = Math.round(2200 * ldiFactor);
+      const t3Rate = Math.round(2500 * ldiFactor);
+      const pieRate = Math.round(2500 * ldiFactor);
+      const qtaSpan = Math.max(5, Math.round(15 / ldiFactor));
+      const qtaThreshold = baseQuota + qtaSpan;
+
+      let slaMult = 1.0;
+      if (isSlaActive) {
+        if (sla >= 96) slaMult = 1.05;
+        else if (sla >= 90) slaMult = 1.00;
+        else slaMult = 0.80;
+      }
+
+      // Generate Volume points: 30 to 130 step 5
+      const volumes = [];
+      for (let v = 30; v <= 130; v += 5) {
+        volumes.push(v);
+      }
+
+      const dataHybTHP = [];
+      const dataPieTHP = [];
+      const dataFixTHP = [];
+      const dataQtaTHP = [];
+      const dataUmkLine = [];
+
+      const dataHybFin = [];
+      const dataPieFin = [];
+      const dataFixFin = [];
+      const dataQtaFin = [];
+
+      volumes.forEach(v => {
+        // 1. Hybrid
+        let inc = 0;
+        if (v > baseQuota) inc += (Math.min(v, t1Max) - baseQuota) * t1Rate;
+        if (v > t1Max) inc += (Math.min(v, t2Max) - t1Max) * t2Rate;
+        if (v > t2Max) inc += (v - t2Max) * t3Rate;
+        const hybDaily = baseDaily + (inc * slaMult);
+        const hybTHP = (hybDaily * days) / 1e6;
+        const hybCpD = v > 0 ? (hybDaily / v) : 0;
+        const hybProfit = ((v * rev - (hybDaily + (v * hubOps))) * fleet * days) / 1e6;
+
+        // 2. Piece-Rate
+        const pieDaily = pieRate * v;
+        const pieTHP = (pieDaily * days) / 1e6;
+        const pieCpD = v > 0 ? (pieDaily / v) : 0;
+        const pieProfit = ((v * rev - (pieDaily + (v * hubOps))) * fleet * days) / 1e6;
+
+        // 3. Fixed Flat
+        const fixDaily = baseDaily;
+        const fixTHP = (fixDaily * days) / 1e6;
+        const fixCpD = v > 0 ? (fixDaily / v) : 0;
+        const fixProfit = ((v * rev - (fixDaily + (v * hubOps))) * fleet * days) / 1e6;
+
+        // 4. Quota Cliff
+        let qtaBonus = 0;
+        if (v >= qtaThreshold) qtaBonus = (v - baseQuota) * t1Rate;
+        const qtaDaily = baseDaily + qtaBonus;
+        const qtaTHP = (qtaDaily * days) / 1e6;
+        const qtaCpD = v > 0 ? (qtaDaily / v) : 0;
+        const qtaProfit = ((v * rev - (qtaDaily + (v * hubOps))) * fleet * days) / 1e6;
+
+        dataHybTHP.push(Number(hybTHP.toFixed(2)));
+        dataPieTHP.push(Number(pieTHP.toFixed(2)));
+        dataFixTHP.push(Number(fixTHP.toFixed(2)));
+        dataQtaTHP.push(Number(qtaTHP.toFixed(2)));
+        dataUmkLine.push(Number((baseMonthly / 1e6).toFixed(2)));
+
+        if (activeFinancialMetric === 'cpd') {
+          dataHybFin.push(Math.round(hybCpD));
+          dataPieFin.push(Math.round(pieCpD));
+          dataFixFin.push(Math.round(fixCpD));
+          dataQtaFin.push(Math.round(qtaCpD));
+        } else {
+          dataHybFin.push(Number(hybProfit.toFixed(1)));
+          dataPieFin.push(Number(pieProfit.toFixed(1)));
+          dataFixFin.push(Number(fixProfit.toFixed(1)));
+          dataQtaFin.push(Number(qtaProfit.toFixed(1)));
+        }
+      });
+
+      // Calculate current active point for Marker
+      let curHybInc = 0;
+      if (currentV > baseQuota) curHybInc += (Math.min(currentV, t1Max) - baseQuota) * t1Rate;
+      if (currentV > t1Max) curHybInc += (Math.min(currentV, t2Max) - t1Max) * t2Rate;
+      if (currentV > t2Max) curHybInc += (currentV - t2Max) * t3Rate;
+      const curHybDaily = baseDaily + (curHybInc * slaMult);
+      const curHybTHP = Number(((curHybDaily * days) / 1e6).toFixed(2));
+      const curHybCpD = currentV > 0 ? Math.round(curHybDaily / currentV) : 0;
+      const curHybProfit = Number((((currentV * rev - (curHybDaily + (currentV * hubOps))) * fleet * days) / 1e6).toFixed(1));
+
+      // Closest label in x-axis for marker
+      const nearestV = Math.min(130, Math.max(30, Math.round(currentV / 5) * 5));
+      const markerDataTHP = volumes.map(v => (v === nearestV ? curHybTHP : null));
+      const markerDataFin = volumes.map(v => (v === nearestV ? (activeFinancialMetric === 'cpd' ? curHybCpD : curHybProfit) : null));
+
+      // Update Chart THP
+      chartTHP.data.labels = volumes.map(v => v + ' pkt');
+      chartTHP.data.datasets[0].data = dataHybTHP;
+      chartTHP.data.datasets[1].data = dataPieTHP;
+      chartTHP.data.datasets[2].data = dataFixTHP;
+      chartTHP.data.datasets[3].data = dataQtaTHP;
+      chartTHP.data.datasets[4].data = dataUmkLine;
+      chartTHP.data.datasets[5].data = markerDataTHP;
+      chartTHP.update('none');
+
+      // Update Chart Financial
+      chartFinancial.data.labels = volumes.map(v => v + ' pkt');
+      chartFinancial.data.datasets[0].data = dataHybFin;
+      chartFinancial.data.datasets[1].data = dataPieFin;
+      chartFinancial.data.datasets[2].data = dataFixFin;
+      chartFinancial.data.datasets[3].data = dataQtaFin;
+      chartFinancial.data.datasets[4].data = markerDataFin;
+      chartFinancial.options.scales.y.title.text = activeFinancialMetric === 'cpd' ? 'Beban Upah (Rp / Paket)' : 'Laba Bersih Hub (Juta Rp / Bulan)';
+      chartFinancial.update('none');
+
+      // Update badge text
+      const badgeChartVolTHP = document.getElementById('badgeChartVolTHP');
+      if (badgeChartVolTHP) badgeChartVolTHP.textContent = `Volume Slider: ${currentV} Pkt`;
+      const badgeChartVolFin = document.getElementById('badgeChartVolFin');
+      if (badgeChartVolFin) badgeChartVolFin.textContent = `${fleet} Kurir (${days} Hari)`;
+    }
+
+
+    // --- COMPARISON ENGINE: EXISTING VS FULL SKEMA BARU ---
+    let currentCompareScenario = 'optimal'; // 'optimal' atau 'baseline'
+    let chartCompareMonthly = null;
+    let chartCompareCpK = null;
+
+    const COMPARE_DATA = {
+      optimal: {
+        newJun: 5120450000,
+        newJul: 5412380000,
+        newAug: 4795120000,
+        totalNew: 15327950000,
+        diffJun: -417959119,
+        diffJul: -397861081,
+        diffAug: -339112747,
+        totalDiff: -1154932947,
+        pctJun: -7.54,
+        pctJul: -6.85,
+        pctAug: -6.60,
+        totalPct: -7.01,
+        cpkNew: 2607,
+        cpkDiff: -196,
+        badgeLabel: 'Rute Optimal',
+        kpiTotalDisplay: 'Rp 15,33 M',
+        kpiTotalMonthly: 'Rp 5,11 Miliar',
+        savingsDisplay: '-Rp 1,15 M',
+        isSavings: true
+      },
+      baseline: {
+        newJun: 5748120000,
+        newJul: 6185450000,
+        newAug: 5492300000,
+        totalNew: 17425870000,
+        diffJun: 209710881,
+        diffJul: 375208919,
+        diffAug: 358067253,
+        totalDiff: 942987053,
+        pctJun: 3.79,
+        pctJul: 6.46,
+        pctAug: 6.97,
+        totalPct: 5.72,
+        cpkNew: 2964,
+        cpkDiff: 161,
+        badgeLabel: 'Konversi 1:1',
+        kpiTotalDisplay: 'Rp 17,43 M',
+        kpiTotalMonthly: 'Rp 5,81 Miliar',
+        savingsDisplay: '+Rp 943 Jt',
+        isSavings: false
+      }
+    };
+
+    function setCompareScenario(scenario) {
+      currentCompareScenario = scenario;
+      const btnOpt = document.getElementById('btnScenarioOpt');
+      const btnBase = document.getElementById('btnScenarioBase');
+
+      if (scenario === 'optimal') {
+        btnOpt.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-emerald-800 shadow-xs transition';
+        btnBase.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition';
+      } else {
+        btnBase.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-800 shadow-xs transition';
+        btnOpt.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition';
+      }
+
+      updateCompareUI();
+    }
+
+    function updateCompareUI() {
+      const d = COMPARE_DATA[currentCompareScenario];
+
+      // Update KPI Cards
+      document.getElementById('badgeScenarioLabel').textContent = d.badgeLabel;
+      document.getElementById('kpiValNewPayroll').textContent = d.kpiTotalDisplay;
+      document.getElementById('kpiValNewPayrollDetail').textContent = formatRupiah(d.totalNew);
+      document.getElementById('kpiValNewPayrollMonthly').textContent = d.kpiTotalMonthly;
+      document.getElementById('kpiValNewPayrollCpK').textContent = formatRupiah(d.cpkNew) + ' / Kg';
+
+      const cardSavingsBg = document.getElementById('cardSavingsBg');
+      const badgeSavingsTag = document.getElementById('badgeSavingsTag');
+      const kpiValSavings = document.getElementById('kpiValSavings');
+      const kpiValSavingsDetail = document.getElementById('kpiValSavingsDetail');
+      const kpiValSavingsPct = document.getElementById('kpiValSavingsPct');
+      const kpiValSavingsMonthly = document.getElementById('kpiValSavingsMonthly');
+
+      if (d.isSavings) {
+        cardSavingsBg.className = 'bg-emerald-50/70 border border-emerald-200 rounded-2xl p-5 shadow-xs relative';
+        badgeSavingsTag.className = 'text-xs px-2 py-0.5 rounded bg-emerald-200/80 text-emerald-900 font-extrabold';
+        badgeSavingsTag.textContent = '🟢 HEMAT BIAYA';
+        kpiValSavings.className = 'text-2xl font-black text-emerald-800 mt-2 font-mono';
+        kpiValSavings.textContent = d.savingsDisplay;
+        kpiValSavingsDetail.className = 'text-[11px] text-emerald-700 mt-1 font-mono';
+        kpiValSavingsDetail.textContent = (d.totalDiff < 0 ? '-' : '+') + formatRupiah(Math.abs(d.totalDiff));
+        kpiValSavingsPct.className = 'font-extrabold text-emerald-800 font-mono';
+        kpiValSavingsPct.textContent = d.totalPct.toFixed(1) + '%';
+        kpiValSavingsMonthly.textContent = '~Rp 385 Juta/bln';
+      } else {
+        cardSavingsBg.className = 'bg-amber-50/70 border border-amber-200 rounded-2xl p-5 shadow-xs relative';
+        badgeSavingsTag.className = 'text-xs px-2 py-0.5 rounded bg-amber-200/80 text-amber-900 font-extrabold';
+        badgeSavingsTag.textContent = '⚠️ BEBAN BERTAMBAH';
+        kpiValSavings.className = 'text-2xl font-black text-amber-900 mt-2 font-mono';
+        kpiValSavings.textContent = d.savingsDisplay;
+        kpiValSavingsDetail.className = 'text-[11px] text-amber-800 mt-1 font-mono';
+        kpiValSavingsDetail.textContent = '+' + formatRupiah(d.totalDiff);
+        kpiValSavingsPct.className = 'font-extrabold text-amber-900 font-mono';
+        kpiValSavingsPct.textContent = '+' + d.totalPct.toFixed(1) + '%';
+        kpiValSavingsMonthly.textContent = '+Rp 314 Juta/bln';
+      }
+
+      // Update Table Rows
+      document.getElementById('tblRowNewJun').textContent = formatRupiah(d.newJun);
+      document.getElementById('tblRowNewJul').textContent = formatRupiah(d.newJul);
+      document.getElementById('tblRowNewAug').textContent = formatRupiah(d.newAug);
+      document.getElementById('tblFooterNew').textContent = formatRupiah(d.totalNew);
+
+      const signJun = d.diffJun < 0 ? '-' : '+';
+      const signJul = d.diffJul < 0 ? '-' : '+';
+      const signAug = d.diffAug < 0 ? '-' : '+';
+      const signTot = d.totalDiff < 0 ? '-' : '+';
+
+      const colorJun = d.diffJun < 0 ? 'text-emerald-700' : 'text-amber-800';
+      const colorJul = d.diffJul < 0 ? 'text-emerald-700' : 'text-amber-800';
+      const colorAug = d.diffAug < 0 ? 'text-emerald-700' : 'text-amber-800';
+      const colorTot = d.totalDiff < 0 ? 'text-emerald-800' : 'text-amber-900';
+
+      const rowDiffJun = document.getElementById('tblRowDiffJun');
+      rowDiffJun.textContent = signJun + formatRupiah(Math.abs(d.diffJun));
+      rowDiffJun.className = 'py-3 px-3 text-right font-mono font-bold ' + colorJun;
+
+      const rowDiffJul = document.getElementById('tblRowDiffJul');
+      rowDiffJul.textContent = signJul + formatRupiah(Math.abs(d.diffJul));
+      rowDiffJul.className = 'py-3 px-3 text-right font-mono font-bold ' + colorJul;
+
+      const rowDiffAug = document.getElementById('tblRowDiffAug');
+      rowDiffAug.textContent = signAug + formatRupiah(Math.abs(d.diffAug));
+      rowDiffAug.className = 'py-3 px-3 text-right font-mono font-bold ' + colorAug;
+
+      const footDiff = document.getElementById('tblFooterDiff');
+      footDiff.textContent = signTot + formatRupiah(Math.abs(d.totalDiff));
+      footDiff.className = 'py-3.5 px-3 text-right font-mono ' + colorTot;
+
+      const badgeClassJun = d.diffJun < 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
+      const badgeClassJul = d.diffJul < 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
+      const badgeClassAug = d.diffAug < 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
+      const badgeClassTot = d.totalDiff < 0 ? 'bg-emerald-200 text-emerald-900' : 'bg-amber-200 text-amber-900';
+
+      document.getElementById('tblRowPctJun').innerHTML = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClassJun} font-mono">${d.pctJun.toFixed(1)}%</span>`;
+      document.getElementById('tblRowPctJul').innerHTML = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClassJul} font-mono">${d.pctJul.toFixed(1)}%</span>`;
+      document.getElementById('tblRowPctAug').innerHTML = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClassAug} font-mono">${d.pctAug.toFixed(1)}%</span>`;
+      document.getElementById('tblFooterPct').innerHTML = `<span class="px-2 py-1 rounded-full text-xs font-black ${badgeClassTot} font-mono">${d.totalPct.toFixed(1)}%</span>`;
+
+      // Update Unit Cost Row
+      document.getElementById('tblFooterCpKNew').textContent = formatRupiah(d.cpkNew) + ' / kg';
+      document.getElementById('tblFooterCpKDiff').textContent = (d.cpkDiff < 0 ? '-' : '+') + formatRupiah(Math.abs(d.cpkDiff)) + ' / kg';
+
+      // Update Charts
+      updateCompareCharts();
+    }
+
+    function initCompareCharts() {
+      if (typeof Chart === 'undefined') return;
+
+      const ctxMonthly = document.getElementById('canvasCompareMonthly');
+      const ctxCpK = document.getElementById('canvasCompareCpK');
+      if (!ctxMonthly || !ctxCpK) return;
+
+      // 1. Chart Monthly Stacked vs Skema Baru
+      chartCompareMonthly = new Chart(ctxMonthly, {
+        type: 'bar',
+        data: {
+          labels: ['Juni 2024', 'Juli 2024', 'Agustus 2024', 'Total 3 Bulan'],
+          datasets: [
+            {
+              label: 'Skema Baru (Exist)',
+              data: [4275.8, 4552.8, 4132.7, 12961.3],
+              backgroundColor: '#0284c7',
+              stack: 'existing',
+              borderRadius: 2
+            },
+            {
+              label: 'Kurir Flat & Lama',
+              data: [405.3, 378.6, 304.8, 1088.6],
+              backgroundColor: '#e11d48',
+              stack: 'existing',
+              borderRadius: 2
+            },
+            {
+              label: 'Kurir Mitra',
+              data: [857.4, 878.9, 696.7, 2433.0],
+              backgroundColor: '#f59e0b',
+              stack: 'existing',
+              borderRadius: { topLeft: 4, topRight: 4 }
+            },
+            {
+              label: 'Full Skema Baru',
+              data: [5120.5, 5412.4, 4795.1, 15328.0],
+              backgroundColor: '#10b981',
+              stack: 'projected',
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.dataset.label + ': Rp ' + context.parsed.y.toLocaleString('id-ID', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' Juta';
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false }
+            },
+            y: {
+              title: { display: true, text: 'Total Payroll (Juta Rp)', font: { size: 10 } },
+              grid: { color: 'rgba(226, 232, 240, 0.6)' }
+            }
+          }
+        }
+      });
+
+      // 2. Chart Cost per Kg
+      chartCompareCpK = new Chart(ctxCpK, {
+        type: 'bar',
+        data: {
+          labels: ['Juni', 'Juli', 'Agustus', 'Rata-rata'],
+          datasets: [
+            {
+              label: 'Skema Existing',
+              data: [3083, 2621, 2751, 2803],
+              backgroundColor: '#64748b',
+              borderRadius: 4
+            },
+            {
+              label: 'Full Skema Baru',
+              data: [2850, 2441, 2569, 2607],
+              backgroundColor: '#10b981',
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { boxWidth: 12, font: { size: 10 } }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.dataset.label + ': Rp ' + context.parsed.y.toLocaleString('id-ID') + ' / kg';
+                }
+              }
+            }
+          },
+          scales: {
+            x: { grid: { display: false } },
+            y: {
+              title: { display: true, text: 'Beban Biaya per Kg (Rp)', font: { size: 10 } },
+              grid: { color: 'rgba(226, 232, 240, 0.6)' }
+            }
+          }
+        }
+      });
+    }
+
+    function updateCompareCharts() {
+      if (!chartCompareMonthly || !chartCompareCpK) return;
+      const d = COMPARE_DATA[currentCompareScenario];
+
+      const valJun = Number((d.newJun / 1e6).toFixed(1));
+      const valJul = Number((d.newJul / 1e6).toFixed(1));
+      const valAug = Number((d.newAug / 1e6).toFixed(1));
+      const valTot = Number((d.totalNew / 1e6).toFixed(1));
+
+      chartCompareMonthly.data.datasets[3].data = [valJun, valJul, valAug, valTot];
+      chartCompareMonthly.data.datasets[3].label = 'Full Skema Baru (' + d.badgeLabel + ')';
+      chartCompareMonthly.update();
+
+      if (currentCompareScenario === 'optimal') {
+        chartCompareCpK.data.datasets[1].data = [2850, 2441, 2569, 2607];
+      } else {
+        chartCompareCpK.data.datasets[1].data = [3200, 2790, 2943, 2964];
+      }
+      chartCompareCpK.update();
+    }
+
+    initRegionCalculator();
+    initCompareCharts();
+    initInteractiveCharts();
     calculateAll();
   </script>
 </body>
